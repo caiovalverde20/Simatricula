@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { axiosASInstance, axiosDASInstance } from '../utils/axiosConfig';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
   Box,
   Button,
   Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Grid,
   Paper,
   TableContainer,
@@ -29,7 +26,7 @@ import {
   ListItemText,
   ListItemButton,
 } from '@mui/material';
-import { Add, Remove, Logout, Refresh } from '@mui/icons-material';
+import { Add, Remove, Logout } from '@mui/icons-material';
 
 function DashboardPage() {
   const [profile, setProfile] = useState(null);
@@ -46,7 +43,7 @@ function DashboardPage() {
     optional: 0,
     complementary: 0,
   });
-  const [selectedTerm, setSelectedTerm] = useState('2024.1');
+  const [selectedTerm, setSelectedTerm] = useState('');
   const [recommendedSubjects, setRecommendedSubjects] = useState([]);
   const [availableClasses, setAvailableClasses] = useState([]);
   const [approvedSubjectNames, setApprovedSubjectNames] = useState([]);
@@ -56,13 +53,7 @@ function DashboardPage() {
   const [slotDialog, setSlotDialog] = useState({ open: false, slotTime: '', slotDay: '', availableClasses: [] });
   const navigate = useNavigate();
 
-  const terms = [];
-  for (let year = 2024; year <= 2030; year++) {
-    terms.push(`${year}.1`);
-    terms.push(`${year}.2`);
-  }
-
-  const handleLoadClassesAndRecommendations = async () => {
+  const handleLoadClassesAndRecommendations = async (term) => {
     const token = localStorage.getItem('token');
   
     try {
@@ -72,7 +63,7 @@ function DashboardPage() {
         },
         params: {
           courseCode,
-          term: selectedTerm,
+          term: term,
         },
       });
   
@@ -101,7 +92,7 @@ function DashboardPage() {
           },
           params: {
             subjectCode: classData.subject.subjectCode,
-            term: selectedTerm,
+            term: term,
           },
         });
   
@@ -149,7 +140,29 @@ function DashboardPage() {
     }
   };
   
-  
+  const fetchCurrentTerm = async (campus) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get('https://eureca.sti.ufcg.edu.br/das-dev/v1/termCalendar/getAllByCurrentTerm', {
+        headers: {
+          'Authentication-Token': token,
+        },
+      });
+
+      const termData = response.data.find(term => term.campus === campus);
+      if (termData) {
+        const term = `${termData.term.toString().slice(0, 4)}.${termData.term.toString().slice(4, 5)}`;
+        setSelectedTerm(term);
+        await handleLoadClassesAndRecommendations(term);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar o período atual:', error);
+      if (error.response && error.response.data.message === "Expired token.") {
+        localStorage.clear();
+        navigate('/login');
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -158,17 +171,17 @@ function DashboardPage() {
         navigate('/login');
         return;
       }
-
+  
       try {
         const profileResponse = await axiosASInstance.get('/as/profile', {
           headers: {
             'Authentication-Token': token,
           },
         });
-
+  
         const profileData = profileResponse.data;
         setProfile(profileData);
-
+  
         const historyResponse = await axiosDASInstance.get('/das/student/getHistory', {
           headers: {
             'Authentication-Token': token,
@@ -177,7 +190,7 @@ function DashboardPage() {
             registration: profileData.id,
           },
         });
-
+  
         const historyData = historyResponse.data.data;
         const approvedSubjects = historyResponse.data.enrollments
           .filter(enrollment => enrollment.status === 'APROVADO')
@@ -185,15 +198,15 @@ function DashboardPage() {
             subjectCode: enrollment.subject.subjectCode,
             name: enrollment.subject.name,
           }));
-
+  
         const approvedSubjectNamesList = approvedSubjects.map(subject => subject.name);
-
+  
         setApprovedSubjectNames(approvedSubjectNamesList);
-
+  
         setCourseCode(historyData.courseCode);
         setCurriculumCode(historyData.curriculumCode);
         setCompletedTerms(historyResponse.data.metrics.completedTerms);
-
+  
         const curriculumResponse = await axiosDASInstance.get('/das/course/getCurriculum', {
           headers: {
             'Authentication-Token': token,
@@ -203,16 +216,16 @@ function DashboardPage() {
             curriculumCode: historyData.curriculumCode,
           },
         });
-
+  
         const curriculumData = curriculumResponse.data;
         const minCreditsInfo = {
           mandatory: curriculumData.minMandatoryCreditsNeeded,
           optional: curriculumData.minOptionalCreditsNeeded,
           complementary: curriculumData.minComplementaryCreditsNeeded,
         };
-
+  
         setCreditsInfo(minCreditsInfo);
-
+  
         const subjectsResponse = await axiosDASInstance.get('/das/course/getSubjectsPerCurriculum', {
           headers: {
             'Authentication-Token': token,
@@ -222,12 +235,12 @@ function DashboardPage() {
             curriculumCode: historyData.curriculumCode,
           },
         });
-
+  
         const subjectsData = subjectsResponse.data;
         let mandatoryCredits = 0;
         let optionalCredits = 0;
         let complementaryCredits = 0;
-
+  
         subjectsData.forEach(subject => {
           const isApproved = approvedSubjectNamesList.includes(subject.subject.name);
           if (isApproved) {
@@ -240,15 +253,22 @@ function DashboardPage() {
             }
           }
         });
-
+  
         setCompletedCredits({
           mandatory: mandatoryCredits,
           optional: optionalCredits,
           complementary: complementaryCredits,
         });
+  
+        const campus = parseInt(profileData.id.toString()[0], 10);
+        await fetchCurrentTerm(campus);
 
-        await handleLoadClassesAndRecommendations();
-
+        if (historyData.courseCode && historyData.curriculumCode && selectedTerm) {
+          await handleLoadClassesAndRecommendations(selectedTerm);
+        } else {
+          console.error("Course code, curriculum code ou termo selecionado estão indefinidos");
+        }
+  
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         if (error.response && error.response.data.message === "Expired token.") {
@@ -257,9 +277,11 @@ function DashboardPage() {
         }
       }
     };
-
+  
     fetchData();
-  }, [navigate]);
+  }, [navigate, selectedTerm]);
+  
+
 
   const handleLogout = () => {
     localStorage.clear();
@@ -385,26 +407,6 @@ function DashboardPage() {
           </Grid>
         </Grid>
       </Paper>
-
-      <Box sx={{ marginTop: 4 }}>
-        <FormControl fullWidth>
-          <InputLabel>Selecione o Período Atual</InputLabel>
-          <Select
-            value={selectedTerm}
-            label="Selecione o Período Atual"
-            onChange={(e) => setSelectedTerm(e.target.value)}
-          >
-            {terms.map(term => (
-              <MenuItem key={term} value={term}>{term}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Box sx={{ textAlign: 'right', marginTop: 2 }}>
-          <Button variant="contained" color="primary" startIcon={<Refresh />} onClick={handleLoadClassesAndRecommendations}>
-            Carregar Cadeiras Ofertadas
-          </Button>
-        </Box>
-      </Box>
 
       <Grid container spacing={4} sx={{ marginTop: 2 }}>
         <Grid item xs={12} md={6}>
