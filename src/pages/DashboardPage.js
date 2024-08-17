@@ -613,35 +613,39 @@ function DashboardPage() {
                       const key = `${day} ${timeSlot}`;
                       const classInfo = agendas[currentAgendaIndex][key];
                       return (
-                        <TableCell
-                          key={day}
-                          sx={{
-                            width: '200px',
-                            maxWidth: '200px',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            backgroundColor: classInfo ? '#e0f7fa' : '#fff',
-                            cursor: 'pointer',
-                            textAlign: 'center',
-                            padding: '8px',
-                          }}
-                          onClick={() => {
-                            if (classInfo) {
-                              handleRemoveClassFromSchedule(classInfo.subjectName);
-                            } else {
-                              handleOpenSlotDialog(day, timeSlot);
-                            }
-                          }}
-                        >
-                          {classInfo ? (
-                            <>
+                        <Tooltip title="Clique para selecionar cadeiras">
+                          <TableCell
+                            key={day}
+                            sx={{
+                              width: '200px',
+                              maxWidth: '200px',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              backgroundColor: classInfo ? '#e0f7fa' : '#fff',
+                              cursor: 'pointer',
+                              textAlign: 'center',
+                              padding: '8px',
+                            }}
+                            onClick={() => {
+                              if (classInfo) {
+                                handleRemoveClassFromSchedule(classInfo.subjectName);
+                              } else {
+                                handleOpenSlotDialog(day, timeSlot);
+                              }
+                            }}
+                          >
+                            {classInfo ? (
                               <Typography variant="subtitle2" noWrap>{classInfo.subjectName}</Typography>
-                            </>
-                          ) : (
-                            '-'
-                          )}
-                        </TableCell>
+                            ) : (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#aaa' }}>
+                                <Add fontSize="small" />
+                                <Typography variant="caption">Adicionar Cadeira</Typography>
+                              </Box>
+                            )}
+                          </TableCell>
+                        </Tooltip>
+
                       );
                     })}
                   </TableRow>
