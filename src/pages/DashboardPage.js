@@ -46,8 +46,8 @@ const CadeiraTable = ({
           label="Pesquisar Cadeira"
           variant="outlined"
           fullWidth
-          value={searchTerm}
-          onChange={onSearchChange}
+          value={searchTerm} // Campo de pesquisa específico
+          onChange={onSearchChange} // Função de pesquisa específica
         />
       </Box>
       {classesData.length > 0 ? (
@@ -129,6 +129,7 @@ const CadeiraTable = ({
   );
 };
 
+
 function DashboardPage() {
   const [profile, setProfile] = useState(null);
   const [courseCode, setCourseCode] = useState('');
@@ -153,7 +154,8 @@ function DashboardPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
   const [slotDialog, setSlotDialog] = useState({ open: false, slotTime: '', slotDay: '', availableClasses: [] });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTermOffered, setSearchTermOffered] = useState('');
+  const [searchTermRecommended, setSearchTermRecommended] = useState(''); 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('error');
@@ -469,17 +471,22 @@ function DashboardPage() {
     setOpenDialog(true);
   };
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value.toLowerCase());
+  const handleSearchChangeOffered = (event) => {
+    setSearchTermOffered(event.target.value.toLowerCase());
+  };
+  
+  const handleSearchChangeRecommended = (event) => {
+    setSearchTermRecommended(event.target.value.toLowerCase());
   };
 
   const filteredAvailableClasses = availableClasses.filter((classData) =>
-    classData.subject.name.toLowerCase().includes(searchTerm)
+    classData.subject.name.toLowerCase().includes(searchTermOffered)
   );
-
+  
   const filteredRecommendedClasses = recommendedSubjects.filter((classData) =>
-    classData.subject.name.toLowerCase().includes(searchTerm)
+    classData.subject.name.toLowerCase().includes(searchTermRecommended)
   );
+  
 
   const handleOpenSlotDialog = (day, timeSlot) => {
     const availableClassesForSlot = availableClasses.filter(classData => {
@@ -597,8 +604,8 @@ function DashboardPage() {
           <CadeiraTable
             classesData={filteredAvailableClasses}
             schedule={agendas[currentAgendaIndex]}
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
+            searchTerm={searchTermOffered}
+            onSearchChange={handleSearchChangeOffered}
             onToggleClass={handleToggleClassInSchedule}
             onOpenDialog={handleOpenDialog}
           />
@@ -611,8 +618,8 @@ function DashboardPage() {
           <CadeiraTable
             classesData={filteredRecommendedClasses}
             schedule={agendas[currentAgendaIndex]}
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
+            searchTerm={searchTermRecommended}
+            onSearchChange={handleSearchChangeRecommended}
             onToggleClass={handleToggleClassInSchedule}
             onOpenDialog={handleOpenDialog}
           />
