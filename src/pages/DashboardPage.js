@@ -29,6 +29,105 @@ import {
 } from '@mui/material';
 import { Add, Remove, Logout } from '@mui/icons-material';
 
+
+const CadeiraTable = ({
+  classesData,
+  schedule,
+  searchTerm,
+  onSearchChange,
+  onToggleClass,
+  onOpenDialog,
+}) => {
+  return (
+    <Paper sx={{ padding: 2, display: 'flex', flexDirection: 'column', height: { xs: '300px', sm: '400px', md: '450px' } }}>
+      <Box sx={{ marginBottom: 2 }}>
+        <TextField
+          label="Pesquisar Cadeira"
+          variant="outlined"
+          fullWidth
+          value={searchTerm}
+          onChange={onSearchChange}
+        />
+      </Box>
+      {classesData.length > 0 ? (
+        <TableContainer sx={{ flex: 1, overflowY: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell>Cadeira</TableCell>
+                <TableCell>Turma</TableCell>
+                <TableCell>Horários</TableCell>
+                <TableCell align="center">Ações</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {classesData.map((classData, index) => {
+                const isSelected = Object.values(schedule).some(
+                  (item) => item.subjectName === classData.subject.name && item.classID === classData.classID
+                );
+
+                const hasSameSubjectConflict = Object.values(schedule).some(
+                  (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
+                );
+
+                const hasTimeConflict = classData.schedules?.some((scheduleItem) => {
+                  const key = `${scheduleItem.day} ${scheduleItem.start}-${scheduleItem.end}`;
+                  return schedule[key] && schedule[key].subjectName !== classData.subject.name;
+                });
+
+                const rowBackgroundColor = isSelected
+                  ? '#e0f2f1'
+                  : hasSameSubjectConflict || hasTimeConflict
+                  ? '#fff8e1'
+                  : '#ffffff';
+
+                return (
+                  <TableRow
+                    key={index}
+                    sx={{ backgroundColor: rowBackgroundColor }}
+                    onDoubleClick={() => onToggleClass(classData)}
+                  >
+                    <TableCell>{classData.subject.name}</TableCell>
+                    <TableCell>T{classData.classID}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        {classData.schedules?.map((schedule, i) => (
+                          <Chip
+                            key={i}
+                            label={`${schedule.day} ${schedule.start} - ${schedule.end}`}
+                            sx={{ margin: 0.5 }}
+                          />
+                        )) || <Typography variant="caption">Horário não disponível</Typography>}
+                      </Box>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title={isSelected ? "Remover da Agenda" : "Adicionar à Agenda"}>
+                        <IconButton
+                          color={isSelected ? "error" : "success"}
+                          onClick={() => onToggleClass(classData)}
+                        >
+                          {isSelected ? <Remove /> : <Add />}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Detalhes da Turma">
+                        <IconButton color="primary" onClick={() => onOpenDialog(classData)}>
+                          <i className="fas fa-info-circle"></i>
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <Typography variant="body1">Nenhuma cadeira disponível.</Typography>
+      )}
+    </Paper>
+  );
+};
+
 function DashboardPage() {
   const [profile, setProfile] = useState(null);
   const [courseCode, setCourseCode] = useState('');
@@ -346,10 +445,17 @@ function DashboardPage() {
     setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedClass(null);
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
   };
+
+  const filteredAvailableClasses = availableClasses.filter((classData) =>
+    classData.subject.name.toLowerCase().includes(searchTerm)
+  );
+
+  const filteredRecommendedClasses = recommendedSubjects.filter((classData) =>
+    classData.subject.name.toLowerCase().includes(searchTerm)
+  );
 
   const handleOpenSlotDialog = (day, timeSlot) => {
     const availableClassesForSlot = availableClasses.filter(classData => {
@@ -371,11 +477,11 @@ function DashboardPage() {
       availableClasses: availableClassesForSlot,
     });
   };
-
+  
   const handleCloseSlotDialog = () => {
     setSlotDialog({ open: false, slotTime: '', slotDay: '', availableClasses: [] });
   };
-
+  
   const handleAddClassToScheduleFromDialog = (classData) => {
     const hasSameSubjectConflict = Object.values(schedule).some(
       (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
@@ -388,14 +494,13 @@ function DashboardPage() {
       handleCloseSlotDialog();
     }
   };
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value.toLowerCase());
+  
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedClass(null);
   };
+  
 
-  const filteredAvailableClasses = availableClasses.filter((classData) =>
-    classData.subject.name.toLowerCase().includes(searchTerm)
-  );
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -437,143 +542,34 @@ function DashboardPage() {
       </Paper>
   
       <Grid container spacing={4} sx={{ marginTop: 2 }}>
-      <Grid item xs={12} md={6}>
-        <Paper
-          sx={{
-            padding: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            height: { xs: '300px', sm: '400px', md: '450px' },
-          }}
-        >
+        <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
             Cadeiras Ofertadas em {selectedTerm}
           </Typography>
-          <Box sx={{ marginBottom: 2 }}>
-            <TextField
-              label="Pesquisar Cadeira"
-              variant="outlined"
-              fullWidth
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </Box>
-          {filteredAvailableClasses.length > 0 ? (
-            <TableContainer
-              sx={{
-                flex: 1,
-                overflowY: 'auto',
-              }}
-            >
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Cadeira</TableCell>
-                    <TableCell>Turma</TableCell>
-                    <TableCell>Horários</TableCell>
-                    <TableCell align="center">Ações</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredAvailableClasses.map((classData, index) => {
-                    const isSelected = Object.values(schedule).some(
-                      (item) => item.subjectName === classData.subject.name && item.classID === classData.classID
-                    );
-
-                    const hasSameSubjectConflict = Object.values(schedule).some(
-                      (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
-                    );
-
-                    const hasTimeConflict = classData.schedules?.some((scheduleItem) => {
-                      const key = `${scheduleItem.day} ${scheduleItem.start}-${scheduleItem.end}`;
-                      return schedule[key] && schedule[key].subjectName !== classData.subject.name;
-                    });
-
-                    const rowBackgroundColor = isSelected
-                      ? '#e0f2f1'
-                      : hasSameSubjectConflict || hasTimeConflict
-                      ? '#fff8e1'
-                      : '#ffffff';
-
-                    return (
-                      <TableRow
-                        key={index}
-                        sx={{ backgroundColor: rowBackgroundColor }}
-                        onDoubleClick={() => handleToggleClassInSchedule(classData)}
-                      >
-                        <TableCell>{classData.subject.name}</TableCell>
-                        <TableCell>T{classData.classID}</TableCell>
-                        <TableCell>
-                          {classData.schedules?.map((schedule, i) => (
-                            <Chip
-                              key={i}
-                              label={`${schedule.day} ${schedule.start} - ${schedule.end}`}
-                              sx={{ margin: 0.5 }}
-                            />
-                          )) || <Typography variant="caption">Horário não disponível</Typography>}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Tooltip title={isSelected ? "Remover da Agenda" : "Adicionar à Agenda"}>
-                            <IconButton
-                              color={isSelected ? "error" : "success"}
-                              onClick={() => handleToggleClassInSchedule(classData)}
-                            >
-                              {isSelected ? <Remove /> : <Add />}
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Detalhes da Turma">
-                            <IconButton color="primary" onClick={() => handleOpenDialog(classData)}>
-                              <i className="fas fa-info-circle"></i>
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Typography variant="body1">Nenhuma cadeira disponível.</Typography>
-          )}
-        </Paper>
-      </Grid>
-
-      <Grid item xs={12} md={6}>
-        <Paper
-          sx={{
-            padding: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            height: { xs: '300px', sm: '400px', md: '450px' },
-          }}
-        >
+          <CadeiraTable
+            classesData={filteredAvailableClasses}
+            schedule={schedule}
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            onToggleClass={handleToggleClassInSchedule}
+            onOpenDialog={handleOpenDialog}
+          />
+        </Grid>
+  
+        <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
             Cadeiras Recomendadas
           </Typography>
-          {recommendedSubjects.length > 0 ? (
-            <TableContainer
-              sx={{
-                flex: 1,
-                overflowY: 'auto',
-              }}
-            >
-              <Table>
-                <TableBody>
-                  {recommendedSubjects.map((subject, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{subject.subject.name}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Typography variant="body1">Nenhuma cadeira recomendada.</Typography>
-          )}
-        </Paper>
+          <CadeiraTable
+            classesData={filteredRecommendedClasses}
+            schedule={schedule}
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            onToggleClass={handleToggleClassInSchedule}
+            onOpenDialog={handleOpenDialog}
+          />
+        </Grid>
       </Grid>
-    </Grid>
   
       <Box sx={{ marginTop: 4 }}>
         <Paper sx={{ padding: 2 }}>
@@ -638,15 +634,11 @@ function DashboardPage() {
           </TableContainer>
         </Paper>
       </Box>
-        
+  
       <Box sx={{ marginTop: 2, textAlign: 'center' }}>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => setSchedule({})}
-          >
-            Limpar Agenda
-          </Button>
+        <Button variant="contained" color="error" onClick={() => setSchedule({})}>
+          Limpar Agenda
+        </Button>
       </Box>
   
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
@@ -658,11 +650,7 @@ function DashboardPage() {
               <Typography variant="subtitle1">Turma: T{selectedClass.classID}</Typography>
               <Typography variant="subtitle1">Horários:</Typography>
               {selectedClass.schedules.map((schedule, i) => (
-                <Chip
-                  key={i}
-                  label={`${schedule.day} ${schedule.start} - ${schedule.end}`}
-                  sx={{ margin: 0.5 }}
-                />
+                <Chip key={i} label={`${schedule.day} ${schedule.start} - ${schedule.end}`} sx={{ margin: 0.5 }} />
               ))}
             </>
           )}
@@ -695,6 +683,7 @@ function DashboardPage() {
       </Dialog>
     </Box>
   );
+  
   
 }
 
