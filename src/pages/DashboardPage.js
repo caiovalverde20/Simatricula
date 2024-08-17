@@ -26,6 +26,8 @@ import {
   ListItem,
   ListItemText,
   ListItemButton,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { Add, Remove, Logout } from '@mui/icons-material';
 
@@ -152,11 +154,24 @@ function DashboardPage() {
   const [selectedClass, setSelectedClass] = useState(null);
   const [slotDialog, setSlotDialog] = useState({ open: false, slotTime: '', slotDay: '', availableClasses: [] });
   const [searchTerm, setSearchTerm] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error');
   const navigate = useNavigate();
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
+  const showSnackbar = (message, severity = 'error') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
   const handleLoadClassesAndRecommendations = async (term) => {
     const token = localStorage.getItem('token');
-  
+
     try {
       const classesResponse = await axiosDASInstance.get('/das/class/getClassCourse', {
         headers: {
@@ -167,9 +182,9 @@ function DashboardPage() {
           term: term,
         },
       });
-  
+
       let classesData = classesResponse.data;
-  
+
       const curriculumResponse = await axiosDASInstance.get('/das/course/getSubjectsPerCurriculum', {
         headers: {
           'Authentication-Token': token,
@@ -179,13 +194,13 @@ function DashboardPage() {
           curriculumCode,
         },
       });
-  
+
       const curriculumSubjects = curriculumResponse.data;
-  
+
       classesData = classesData.filter(classData =>
         curriculumSubjects.some(subject => subject.subject.subjectCode === classData.subject.subjectCode)
       );
-  
+
       const classesWithSchedules = await Promise.all(classesData.map(async classData => {
         const scheduleResponse = await axiosDASInstance.get('/das/class/getClassSchedule', {
           headers: {
@@ -196,7 +211,7 @@ function DashboardPage() {
             term: term,
           },
         });
-  
+
         const schedules = scheduleResponse.data
           .filter(schedule => schedule.academicClassId === classData.classID)
           .map(schedule => {
@@ -207,21 +222,21 @@ function DashboardPage() {
               5: 'Quinta',
               6: 'Sexta',
             };
-  
+
             return {
               day: dayMap[schedule.dayOfWeek],
               start: schedule.startHour,
               end: schedule.endHour,
             };
           });
-  
+
         return { ...classData, schedules };
       }));
-  
+
       const filteredClasses = classesWithSchedules.filter(classData => !approvedSubjectNames.includes(classData.subject.name));
-  
+
       setAvailableClasses(filteredClasses);
-  
+
       const recommended = filteredClasses.filter(classData => {
         const matchingCurriculumSubject = curriculumSubjects.find(
           subject => subject.subject.name === classData.subject.name &&
@@ -230,17 +245,18 @@ function DashboardPage() {
         );
         return matchingCurriculumSubject !== undefined;
       });
-  
+
       setRecommendedSubjects(recommended);
     } catch (error) {
       console.error('Erro ao buscar cadeiras e recomendações:', error);
       if (error.response && error.response.data.message === "Expired token.") {
         localStorage.clear();
         navigate('/login');
+      } else {
       }
     }
   };
-  
+
   const fetchCurrentTerm = async (campus) => {
     const token = localStorage.getItem('token');
     try {
@@ -261,6 +277,8 @@ function DashboardPage() {
       if (error.response && error.response.data.message === "Expired token.") {
         localStorage.clear();
         navigate('/login');
+      } else {
+        showSnackbar('Houve um problema ao carregar o período atual. Tente novamente mais tarde.', 'error');
       }
     }
   };
@@ -272,17 +290,17 @@ function DashboardPage() {
         navigate('/login');
         return;
       }
-  
+
       try {
         const profileResponse = await axiosASInstance.get('/as/profile', {
           headers: {
             'Authentication-Token': token,
           },
         });
-  
+
         const profileData = profileResponse.data;
         setProfile(profileData);
-  
+
         const historyResponse = await axiosDASInstance.get('/das/student/getHistory', {
           headers: {
             'Authentication-Token': token,
@@ -291,7 +309,7 @@ function DashboardPage() {
             registration: profileData.id,
           },
         });
-  
+
         const historyData = historyResponse.data.data;
         const approvedSubjects = historyResponse.data.enrollments
           .filter(enrollment => enrollment.status === 'APROVADO')
@@ -299,15 +317,15 @@ function DashboardPage() {
             subjectCode: enrollment.subject.subjectCode,
             name: enrollment.subject.name,
           }));
-  
+
         const approvedSubjectNamesList = approvedSubjects.map(subject => subject.name);
-  
+
         setApprovedSubjectNames(approvedSubjectNamesList);
-  
+
         setCourseCode(historyData.courseCode);
         setCurriculumCode(historyData.curriculumCode);
         setCompletedTerms(historyResponse.data.metrics.completedTerms);
-  
+
         const curriculumResponse = await axiosDASInstance.get('/das/course/getCurriculum', {
           headers: {
             'Authentication-Token': token,
@@ -317,16 +335,16 @@ function DashboardPage() {
             curriculumCode: historyData.curriculumCode,
           },
         });
-  
+
         const curriculumData = curriculumResponse.data;
         const minCreditsInfo = {
           mandatory: curriculumData.minMandatoryCreditsNeeded,
           optional: curriculumData.minOptionalCreditsNeeded,
           complementary: curriculumData.minComplementaryCreditsNeeded,
         };
-  
+
         setCreditsInfo(minCreditsInfo);
-  
+
         const subjectsResponse = await axiosDASInstance.get('/das/course/getSubjectsPerCurriculum', {
           headers: {
             'Authentication-Token': token,
@@ -336,12 +354,12 @@ function DashboardPage() {
             curriculumCode: historyData.curriculumCode,
           },
         });
-  
+
         const subjectsData = subjectsResponse.data;
         let mandatoryCredits = 0;
         let optionalCredits = 0;
         let complementaryCredits = 0;
-  
+
         subjectsData.forEach(subject => {
           const isApproved = approvedSubjectNamesList.includes(subject.subject.name);
           if (isApproved) {
@@ -354,13 +372,13 @@ function DashboardPage() {
             }
           }
         });
-  
+
         setCompletedCredits({
           mandatory: mandatoryCredits,
           optional: optionalCredits,
           complementary: complementaryCredits,
         });
-  
+
         const campus = parseInt(profileData.id.toString()[0], 10);
         await fetchCurrentTerm(campus);
 
@@ -369,16 +387,18 @@ function DashboardPage() {
         } else {
           console.error("Course code, curriculum code ou termo selecionado estão indefinidos");
         }
-  
+
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         if (error.response && error.response.data.message === "Expired token.") {
           localStorage.clear();
           navigate('/login');
+        } else {
+          showSnackbar('Houve um problema ao carregar as informações. Tente novamente mais tarde.', 'error');
         }
       }
     };
-  
+
     fetchData();
   }, [navigate, selectedTerm]);
 
@@ -389,18 +409,18 @@ function DashboardPage() {
 
   const handleAddClassToSchedule = (classData) => {
     if (!classData.schedules) {
-      console.error(`Horários não encontrados para a cadeira ${classData.subject.name}`);
+      showSnackbar(`Horários não encontrados para a cadeira ${classData.subject.name}`, 'warning');
       return;
     }
-  
+
     for (const scheduleItem of classData.schedules) {
       const key = `${scheduleItem.day} ${scheduleItem.start}-${scheduleItem.end}`;
       if (agendas[currentAgendaIndex][key]) {
-        alert(`Conflito de horário com ${agendas[currentAgendaIndex][key].subjectName} na ${key}`);
+        showSnackbar(`Conflito de horário com ${agendas[currentAgendaIndex][key].subjectName} na ${key}`, 'warning');
         return;
       }
     }
-  
+
     const newSchedule = { ...agendas[currentAgendaIndex] };
     for (const scheduleItem of classData.schedules) {
       const key = `${scheduleItem.day} ${scheduleItem.start}-${scheduleItem.end}`;
@@ -413,7 +433,7 @@ function DashboardPage() {
     updatedAgendas[currentAgendaIndex] = newSchedule;
     setAgendas(updatedAgendas);
   };
-  
+
   const handleRemoveClassFromSchedule = (subjectName) => {
     const newSchedule = { ...agendas[currentAgendaIndex] };
     for (const key in newSchedule) {
@@ -430,15 +450,15 @@ function DashboardPage() {
     const isSelected = Object.values(agendas[currentAgendaIndex]).some(
       (item) => item.subjectName === classData.subject.name && item.classID === classData.classID
     );
-  
+
     const hasSameSubjectConflict = Object.values(agendas[currentAgendaIndex]).some(
       (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
     );
-  
+
     if (isSelected) {
       handleRemoveClassFromSchedule(classData.subject.name);
     } else if (hasSameSubjectConflict) {
-      alert(`Conflito: Já existe uma turma da disciplina ${classData.subject.name} na sua agenda.`);
+      showSnackbar(`Conflito: Já existe uma turma da disciplina ${classData.subject.name} na sua agenda.`, 'warning');
     } else {
       handleAddClassToSchedule(classData);
     }
@@ -466,14 +486,14 @@ function DashboardPage() {
       const hasSameSubjectConflict = Object.values(agendas[currentAgendaIndex]).some(
         (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
       );
-  
+
       const matchesTimeSlot = classData.schedules?.some(schedule =>
         schedule.day === day && schedule.start === timeSlot.split('-')[0]
       );
-  
+
       return !hasSameSubjectConflict && matchesTimeSlot;
     });
-  
+
     setSlotDialog({
       open: true,
       slotTime: timeSlot,
@@ -481,24 +501,24 @@ function DashboardPage() {
       availableClasses: availableClassesForSlot,
     });
   };
-  
+
   const handleCloseSlotDialog = () => {
     setSlotDialog({ open: false, slotTime: '', slotDay: '', availableClasses: [] });
   };
-  
+
   const handleAddClassToScheduleFromDialog = (classData) => {
     const hasSameSubjectConflict = Object.values(agendas[currentAgendaIndex]).some(
       (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
     );
-  
+
     if (hasSameSubjectConflict) {
-      alert(`Conflito: Já existe uma turma da disciplina ${classData.subject.name} na sua agenda.`);
+      showSnackbar(`Conflito: Já existe uma turma da disciplina ${classData.subject.name} na sua agenda.`, 'warning');
     } else {
       handleAddClassToSchedule(classData);
       handleCloseSlotDialog();
     }
   };
-  
+
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedClass(null);
@@ -521,6 +541,17 @@ function DashboardPage() {
 
   return (
     <Box sx={{ padding: 4 }}>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} sm={8}>
           <Typography variant="h4" gutterBottom>
@@ -535,7 +566,7 @@ function DashboardPage() {
           </Tooltip>
         </Grid>
       </Grid>
-  
+
       <Paper sx={{ padding: 2, marginTop: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -557,7 +588,7 @@ function DashboardPage() {
           </Grid>
         </Grid>
       </Paper>
-  
+
       <Grid container spacing={4} sx={{ marginTop: 2 }}>
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
@@ -572,7 +603,7 @@ function DashboardPage() {
             onOpenDialog={handleOpenDialog}
           />
         </Grid>
-  
+
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
             Cadeiras Recomendadas
@@ -587,7 +618,7 @@ function DashboardPage() {
           />
         </Grid>
       </Grid>
-  
+
       <Box sx={{ marginTop: 4 }}>
         <Paper sx={{ padding: 2 }}>
           <Typography variant="h5" align="center" gutterBottom>
@@ -645,7 +676,6 @@ function DashboardPage() {
                             )}
                           </TableCell>
                         </Tooltip>
-
                       );
                     })}
                   </TableRow>
@@ -661,7 +691,7 @@ function DashboardPage() {
           Limpar Agenda Atual
         </Button>
       </Box>
-  
+
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, marginBottom: 2, marginTop: 4 }}>
         {agendas.map((_, index) => (
           <Button
@@ -676,7 +706,7 @@ function DashboardPage() {
           <Add />
         </IconButton>
       </Box>
-  
+
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Detalhes da Turma</DialogTitle>
         <DialogContent>
@@ -695,7 +725,7 @@ function DashboardPage() {
           <Button onClick={handleCloseDialog} color="primary">Fechar</Button>
         </DialogActions>
       </Dialog>
-  
+
       <Dialog open={slotDialog.open} onClose={handleCloseSlotDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Cadeiras Disponíveis para {slotDialog.slotDay}, {slotDialog.slotTime}</DialogTitle>
         <DialogContent>
