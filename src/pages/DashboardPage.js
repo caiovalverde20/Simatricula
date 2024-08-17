@@ -29,7 +29,6 @@ import {
 } from '@mui/material';
 import { Add, Remove, Logout } from '@mui/icons-material';
 
-
 const CadeiraTable = ({
   classesData,
   schedule,
@@ -147,7 +146,8 @@ function DashboardPage() {
   const [recommendedSubjects, setRecommendedSubjects] = useState([]);
   const [availableClasses, setAvailableClasses] = useState([]);
   const [approvedSubjectNames, setApprovedSubjectNames] = useState([]);
-  const [schedule, setSchedule] = useState({});
+  const [agendas, setAgendas] = useState([{}]);
+  const [currentAgendaIndex, setCurrentAgendaIndex] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
   const [slotDialog, setSlotDialog] = useState({ open: false, slotTime: '', slotDay: '', availableClasses: [] });
@@ -395,13 +395,13 @@ function DashboardPage() {
   
     for (const scheduleItem of classData.schedules) {
       const key = `${scheduleItem.day} ${scheduleItem.start}-${scheduleItem.end}`;
-      if (schedule[key]) {
-        alert(`Conflito de horário com ${schedule[key].subjectName} na ${key}`);
+      if (agendas[currentAgendaIndex][key]) {
+        alert(`Conflito de horário com ${agendas[currentAgendaIndex][key].subjectName} na ${key}`);
         return;
       }
     }
   
-    const newSchedule = { ...schedule };
+    const newSchedule = { ...agendas[currentAgendaIndex] };
     for (const scheduleItem of classData.schedules) {
       const key = `${scheduleItem.day} ${scheduleItem.start}-${scheduleItem.end}`;
       newSchedule[key] = {
@@ -409,25 +409,29 @@ function DashboardPage() {
         classID: classData.classID,
       };
     }
-    setSchedule(newSchedule);
+    const updatedAgendas = [...agendas];
+    updatedAgendas[currentAgendaIndex] = newSchedule;
+    setAgendas(updatedAgendas);
   };
   
   const handleRemoveClassFromSchedule = (subjectName) => {
-    const newSchedule = { ...schedule };
+    const newSchedule = { ...agendas[currentAgendaIndex] };
     for (const key in newSchedule) {
       if (newSchedule[key].subjectName === subjectName) {
         delete newSchedule[key];
       }
     }
-    setSchedule(newSchedule);
+    const updatedAgendas = [...agendas];
+    updatedAgendas[currentAgendaIndex] = newSchedule;
+    setAgendas(updatedAgendas);
   };
 
   const handleToggleClassInSchedule = (classData) => {
-    const isSelected = Object.values(schedule).some(
+    const isSelected = Object.values(agendas[currentAgendaIndex]).some(
       (item) => item.subjectName === classData.subject.name && item.classID === classData.classID
     );
   
-    const hasSameSubjectConflict = Object.values(schedule).some(
+    const hasSameSubjectConflict = Object.values(agendas[currentAgendaIndex]).some(
       (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
     );
   
@@ -459,7 +463,7 @@ function DashboardPage() {
 
   const handleOpenSlotDialog = (day, timeSlot) => {
     const availableClassesForSlot = availableClasses.filter(classData => {
-      const hasSameSubjectConflict = Object.values(schedule).some(
+      const hasSameSubjectConflict = Object.values(agendas[currentAgendaIndex]).some(
         (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
       );
   
@@ -483,7 +487,7 @@ function DashboardPage() {
   };
   
   const handleAddClassToScheduleFromDialog = (classData) => {
-    const hasSameSubjectConflict = Object.values(schedule).some(
+    const hasSameSubjectConflict = Object.values(agendas[currentAgendaIndex]).some(
       (item) => item.subjectName === classData.subject.name && item.classID !== classData.classID
     );
   
@@ -499,8 +503,21 @@ function DashboardPage() {
     setOpenDialog(false);
     setSelectedClass(null);
   };
-  
 
+  const handleAddAgenda = () => {
+    setAgendas([...agendas, {}]);
+    setCurrentAgendaIndex(agendas.length);
+  };
+
+  const handleSwitchAgenda = (index) => {
+    setCurrentAgendaIndex(index);
+  };
+
+  const handleClearAgenda = () => {
+    const updatedAgendas = [...agendas];
+    updatedAgendas[currentAgendaIndex] = {};
+    setAgendas(updatedAgendas);
+  };
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -548,7 +565,7 @@ function DashboardPage() {
           </Typography>
           <CadeiraTable
             classesData={filteredAvailableClasses}
-            schedule={schedule}
+            schedule={agendas[currentAgendaIndex]}
             searchTerm={searchTerm}
             onSearchChange={handleSearchChange}
             onToggleClass={handleToggleClassInSchedule}
@@ -562,7 +579,7 @@ function DashboardPage() {
           </Typography>
           <CadeiraTable
             classesData={filteredRecommendedClasses}
-            schedule={schedule}
+            schedule={agendas[currentAgendaIndex]}
             searchTerm={searchTerm}
             onSearchChange={handleSearchChange}
             onToggleClass={handleToggleClassInSchedule}
@@ -594,7 +611,7 @@ function DashboardPage() {
                     <TableCell sx={{ width: '120px' }}>{timeSlot}</TableCell>
                     {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].map(day => {
                       const key = `${day} ${timeSlot}`;
-                      const classInfo = Object.entries(schedule).find(([k, v]) => k === key);
+                      const classInfo = agendas[currentAgendaIndex][key];
                       return (
                         <TableCell
                           key={day}
@@ -611,7 +628,7 @@ function DashboardPage() {
                           }}
                           onClick={() => {
                             if (classInfo) {
-                              handleRemoveClassFromSchedule(classInfo[1].subjectName);
+                              handleRemoveClassFromSchedule(classInfo.subjectName);
                             } else {
                               handleOpenSlotDialog(day, timeSlot);
                             }
@@ -619,7 +636,7 @@ function DashboardPage() {
                         >
                           {classInfo ? (
                             <>
-                              <Typography variant="subtitle2" noWrap>{classInfo[1].subjectName}</Typography>
+                              <Typography variant="subtitle2" noWrap>{classInfo.subjectName}</Typography>
                             </>
                           ) : (
                             '-'
@@ -634,11 +651,26 @@ function DashboardPage() {
           </TableContainer>
         </Paper>
       </Box>
-  
+
       <Box sx={{ marginTop: 2, textAlign: 'center' }}>
-        <Button variant="contained" color="error" onClick={() => setSchedule({})}>
-          Limpar Agenda
+        <Button variant="contained" color="error" onClick={handleClearAgenda}>
+          Limpar Agenda Atual
         </Button>
+      </Box>
+  
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, marginBottom: 2, marginTop: 4 }}>
+        {agendas.map((_, index) => (
+          <Button
+            key={index}
+            variant={index === currentAgendaIndex ? 'contained' : 'outlined'}
+            onClick={() => handleSwitchAgenda(index)}
+          >
+            {index + 1}
+          </Button>
+        ))}
+        <IconButton color="primary" onClick={handleAddAgenda}>
+          <Add />
+        </IconButton>
       </Box>
   
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
@@ -683,8 +715,6 @@ function DashboardPage() {
       </Dialog>
     </Box>
   );
-  
-  
 }
 
 export default DashboardPage;
