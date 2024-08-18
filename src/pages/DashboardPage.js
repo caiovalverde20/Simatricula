@@ -5,6 +5,7 @@ import axios from 'axios';
 import {
   Box,
   TextField,
+  CircularProgress,
   Button,
   Typography,
   Grid,
@@ -38,6 +39,7 @@ const CadeiraTable = ({
   onSearchChange,
   onToggleClass,
   onOpenDialog,
+  loading,
 }) => {
   return (
     <Paper sx={{ padding: 2, display: 'flex', flexDirection: 'column', height: { xs: '300px', sm: '400px', md: '450px' } }}>
@@ -50,7 +52,12 @@ const CadeiraTable = ({
           onChange={onSearchChange}
         />
       </Box>
-      {classesData.length > 0 ? (
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <CircularProgress />
+          <Typography variant="body1" sx={{ marginLeft: 2 }}>Carregando cadeiras...</Typography>
+        </Box>
+      ) : classesData.length > 0 ? (
         <TableContainer sx={{ flex: 1, overflowY: 'auto' }}>
           <Table stickyHeader>
             <TableHead>
@@ -149,7 +156,7 @@ const CadeiraTable = ({
           </Table>
         </TableContainer>
       ) : (
-        <Typography variant="body1">Nenhuma cadeira disponível.</Typography>
+        <Typography variant="body1" align="center">Nenhuma cadeira disponível.</Typography>
       )}
     </Paper>
   );
@@ -158,6 +165,7 @@ const CadeiraTable = ({
 
 
 function DashboardPage() {
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [courseCode, setCourseCode] = useState('');
   const [curriculumCode, setCurriculumCode] = useState('');
@@ -258,13 +266,13 @@ function DashboardPage() {
               end: schedule.endHour,
             };
           });
-
         return { ...classData, schedules };
       }));
 
       const filteredClasses = classesWithSchedules.filter(classData => !approvedSubjectNames.includes(classData.subject.name));
 
       setAvailableClasses(filteredClasses);
+      setLoading(false)
 
       const recommended = filteredClasses.filter(classData => {
         const matchingCurriculumSubject = curriculumSubjects.find(
@@ -311,9 +319,11 @@ function DashboardPage() {
       }
     }
   };
+  
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
@@ -338,7 +348,6 @@ function DashboardPage() {
             registration: profileData.id,
           },
         });
-
         const historyData = historyResponse.data.data;
         const approvedSubjects = historyResponse.data.enrollments
           .filter(enrollment => enrollment.status === 'APROVADO')
@@ -426,8 +435,8 @@ function DashboardPage() {
           showSnackbar('Houve um problema ao carregar as informações. Tente novamente mais tarde.', 'error');
         }
       }
+      
     };
-
     fetchData();
   }, [navigate, selectedTerm]);
 
@@ -635,6 +644,7 @@ function DashboardPage() {
             onSearchChange={handleSearchChangeOffered}
             onToggleClass={handleToggleClassInSchedule}
             onOpenDialog={handleOpenDialog}
+            loading={loading}
           />
         </Grid>
 
@@ -649,6 +659,7 @@ function DashboardPage() {
             onSearchChange={handleSearchChangeRecommended}
             onToggleClass={handleToggleClassInSchedule}
             onOpenDialog={handleOpenDialog}
+            loading={loading}
           />
         </Grid>
       </Grid>
