@@ -85,7 +85,18 @@ const CadeiraTable = ({
                 return (
                   <TableRow
                     key={index}
-                    sx={{ backgroundColor: rowBackgroundColor }}
+                    sx={{
+                      backgroundColor: rowBackgroundColor,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: isSelected ? '#b2dfdb' : '#f0f0f0',
+                        '& .double-click-hint': {
+                          opacity: 1,
+                        },
+                      },
+                      position: 'relative',
+                      transition: 'background-color 0.3s ease',
+                    }}
                     onDoubleClick={() => onToggleClass(classData)}
                   >
                     <TableCell>{classData.subject.name}</TableCell>
@@ -116,6 +127,21 @@ const CadeiraTable = ({
                         </IconButton>
                       </Tooltip>
                     </TableCell>
+                    <Typography
+                      className="double-click-hint"
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        color: '#aaa',
+                        fontSize: '12px',
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                    </Typography>
                   </TableRow>
                 );
               })}
@@ -128,6 +154,7 @@ const CadeiraTable = ({
     </Paper>
   );
 };
+
 
 
 function DashboardPage() {
