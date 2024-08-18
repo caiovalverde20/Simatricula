@@ -46,8 +46,8 @@ const CadeiraTable = ({
           label="Pesquisar Cadeira"
           variant="outlined"
           fullWidth
-          value={searchTerm} // Campo de pesquisa específico
-          onChange={onSearchChange} // Função de pesquisa específica
+          value={searchTerm}
+          onChange={onSearchChange}
         />
       </Box>
       {classesData.length > 0 ? (
@@ -651,38 +651,62 @@ function DashboardPage() {
                       const key = `${day} ${timeSlot}`;
                       const classInfo = agendas[currentAgendaIndex][key];
                       return (
-                        <Tooltip title="Clique para selecionar cadeiras">
-                          <TableCell
-                            key={day}
-                            sx={{
-                              width: '200px',
-                              maxWidth: '200px',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              backgroundColor: classInfo ? '#e0f7fa' : '#fff',
-                              cursor: 'pointer',
-                              textAlign: 'center',
-                              padding: '8px',
-                            }}
-                            onClick={() => {
-                              if (classInfo) {
-                                handleRemoveClassFromSchedule(classInfo.subjectName);
-                              } else {
-                                handleOpenSlotDialog(day, timeSlot);
+                        <Tooltip title={classInfo ? "Clique para remover a cadeira da agenda" : "Clique para adicionar uma cadeira"}>
+                        <TableCell
+                          key={day}
+                          sx={{
+                            width: '200px',
+                            maxWidth: '200px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            backgroundColor: classInfo ? '#e0f7fa' : '#fff',
+                            cursor: classInfo ? 'pointer' : 'default',
+                            textAlign: 'center',
+                            padding: '8px',
+                            position: 'relative',
+                            '&:hover': {
+                              backgroundColor: classInfo ? '#ffcdd2' : '#f0f0f0',
+                              '& .remove-text': {
+                                opacity: 1,
                               }
-                            }}
-                          >
-                            {classInfo ? (
+                            }
+                          }}
+                          onClick={() => {
+                            if (classInfo) {
+                              handleRemoveClassFromSchedule(classInfo.subjectName);
+                            } else {
+                              handleOpenSlotDialog(day, timeSlot);
+                            }
+                          }}
+                        >
+                          {classInfo ? (
+                            <>
                               <Typography variant="subtitle2" noWrap>{classInfo.subjectName}</Typography>
-                            ) : (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#aaa' }}>
-                                <Add fontSize="small" />
-                                <Typography variant="caption">Adicionar Cadeira</Typography>
-                              </Box>
-                            )}
-                          </TableCell>
-                        </Tooltip>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  position: 'absolute',
+                                  bottom: 2,
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  opacity: 0,
+                                  transition: 'opacity 0.3s ease-in-out',
+                                  color: 'red',
+                                }}
+                                className="remove-text"
+                              >
+                                Remover
+                              </Typography>
+                            </>
+                          ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#aaa' }}>
+                              <Add fontSize="small" />
+                              <Typography variant="caption">Adicionar Cadeira</Typography>
+                            </Box>
+                          )}
+                        </TableCell>
+                      </Tooltip>
                       );
                     })}
                   </TableRow>
