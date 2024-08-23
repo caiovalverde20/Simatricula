@@ -30,7 +30,7 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { Add, Remove, Logout } from '@mui/icons-material';
+import { Add, Remove, Logout, DarkMode, LightMode } from '@mui/icons-material';
 
 const CadeiraTable = ({
   classesData,
@@ -40,9 +40,10 @@ const CadeiraTable = ({
   onToggleClass,
   onOpenDialog,
   loading,
+  theme,
 }) => {
   return (
-    <Paper sx={{ padding: 2, display: 'flex', flexDirection: 'column', height: { xs: '300px', sm: '400px', md: '450px' } }}>
+    <Paper sx={{ padding: 2, display: 'flex', flexDirection: 'column', height: { xs: '300px', sm: '400px', md: '450px' }, backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
       <Box sx={{ marginBottom: 2 }}>
         <TextField
           label="Pesquisar Cadeira"
@@ -50,22 +51,27 @@ const CadeiraTable = ({
           fullWidth
           value={searchTerm}
           onChange={onSearchChange}
+          sx={{
+            input: { color: theme === 'light' ? '#000000' : '#ffffff' },
+            label: { color: theme === 'light' ? '#000000' : '#ffffff' },
+            fieldset: { borderColor: theme === 'light' ? '#000000' : '#ffffff' },
+          }}
         />
       </Box>
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <CircularProgress />
-          <Typography variant="body1" sx={{ marginLeft: 2 }}>Carregando cadeiras...</Typography>
+          <CircularProgress sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }} />
+          <Typography variant="body1" sx={{ marginLeft: 2, color: theme === 'light' ? '#000000' : '#ffffff' }}>Carregando cadeiras...</Typography>
         </Box>
       ) : classesData.length > 0 ? (
         <TableContainer sx={{ flex: 1, overflowY: 'auto' }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell>Cadeira</TableCell>
-                <TableCell>Turma</TableCell>
-                <TableCell>Horários</TableCell>
-                <TableCell align="center">Ações</TableCell>
+                <TableCell sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Cadeira</TableCell>
+                <TableCell sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Turma</TableCell>
+                <TableCell sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Horários</TableCell>
+                <TableCell align="center" sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Ações</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -84,10 +90,10 @@ const CadeiraTable = ({
                 });
 
                 const rowBackgroundColor = isSelected
-                  ? '#e0f2f1'
+                  ? theme === 'light' ? '#e0f2f1' : '#37474f'
                   : hasSameSubjectConflict || hasTimeConflict
-                  ? '#fff8e1'
-                  : '#ffffff';
+                  ? theme === 'light' ? '#fff8e1' : '#424242'
+                  : theme === 'light' ? '#ffffff' : '#303030';
 
                 return (
                   <TableRow
@@ -96,27 +102,25 @@ const CadeiraTable = ({
                       backgroundColor: rowBackgroundColor,
                       cursor: 'pointer',
                       '&:hover': {
-                        backgroundColor: isSelected ? '#b2dfdb' : '#f0f0f0',
-                        '& .double-click-hint': {
-                          opacity: 1,
-                        },
+                        backgroundColor: isSelected ? theme === 'light' ? '#b2dfdb' : '#455a64' : theme === 'light' ? '#f0f0f0' : '#424242',
                       },
                       position: 'relative',
                       transition: 'background-color 0.3s ease',
+                      color: theme === 'light' ? '#000000' : '#ffffff',
                     }}
                     onDoubleClick={() => onToggleClass(classData)}
                   >
-                    <TableCell>{classData.subject.name}</TableCell>
-                    <TableCell>T{classData.classID}</TableCell>
+                    <TableCell sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>{classData.subject.name}</TableCell>
+                    <TableCell sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>T{classData.classID}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         {classData.schedules?.map((schedule, i) => (
                           <Chip
                             key={i}
                             label={`${schedule.day} ${schedule.start} - ${schedule.end}`}
-                            sx={{ margin: 0.5 }}
+                            sx={{ margin: 0.5, backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}
                           />
-                        )) || <Typography variant="caption">Horário não disponível</Typography>}
+                        )) || <Typography variant="caption" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Horário não disponível</Typography>}
                       </Box>
                     </TableCell>
                     <TableCell align="center">
@@ -124,31 +128,17 @@ const CadeiraTable = ({
                         <IconButton
                           color={isSelected ? "error" : "success"}
                           onClick={() => onToggleClass(classData)}
+                          sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}
                         >
                           {isSelected ? <Remove /> : <Add />}
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Detalhes da Turma">
-                        <IconButton color="primary" onClick={() => onOpenDialog(classData)}>
+                        <IconButton color="primary" onClick={() => onOpenDialog(classData)} sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>
                           <i className="fas fa-info-circle"></i>
                         </IconButton>
                       </Tooltip>
                     </TableCell>
-                    <Typography
-                      className="double-click-hint"
-                      sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        color: '#aaa',
-                        fontSize: '12px',
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease',
-                        pointerEvents: 'none',
-                      }}
-                    >
-                    </Typography>
                   </TableRow>
                 );
               })}
@@ -156,13 +146,11 @@ const CadeiraTable = ({
           </Table>
         </TableContainer>
       ) : (
-        <Typography variant="body1" align="center">Nenhuma cadeira disponível.</Typography>
+        <Typography variant="body1" align="center" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Nenhuma cadeira disponível.</Typography>
       )}
     </Paper>
   );
 };
-
-
 
 function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -190,10 +178,11 @@ function DashboardPage() {
   const [selectedClass, setSelectedClass] = useState(null);
   const [slotDialog, setSlotDialog] = useState({ open: false, slotTime: '', slotDay: '', availableClasses: [] });
   const [searchTermOffered, setSearchTermOffered] = useState('');
-  const [searchTermRecommended, setSearchTermRecommended] = useState(''); 
+  const [searchTermRecommended, setSearchTermRecommended] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('error');
+  const [theme, setTheme] = useState('light');
   const navigate = useNavigate();
 
   const handleCloseSnackbar = () => {
@@ -205,6 +194,13 @@ function DashboardPage() {
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
+  const getBackgroundColor = () => (theme === 'light' ? '#d6eaf8' : '#121212');
+  const getTextColor = () => (theme === 'light' ? '#000000' : '#ffffff');
 
   const handleLoadClassesAndRecommendations = async (term) => {
     const token = localStorage.getItem('token');
@@ -272,7 +268,7 @@ function DashboardPage() {
       const filteredClasses = classesWithSchedules.filter(classData => !approvedSubjectNames.includes(classData.subject.name));
 
       setAvailableClasses(filteredClasses);
-      setLoading(false)
+      setLoading(false);
 
       const recommended = filteredClasses.filter(classData => {
         const matchingCurriculumSubject = curriculumSubjects.find(
@@ -319,11 +315,10 @@ function DashboardPage() {
       }
     }
   };
-  
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
+      setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
@@ -435,7 +430,7 @@ function DashboardPage() {
           showSnackbar('Houve um problema ao carregar as informações. Tente novamente mais tarde.', 'error');
         }
       }
-      
+
     };
     fetchData();
   }, [navigate, selectedTerm]);
@@ -510,7 +505,7 @@ function DashboardPage() {
   const handleSearchChangeOffered = (event) => {
     setSearchTermOffered(event.target.value.toLowerCase());
   };
-  
+
   const handleSearchChangeRecommended = (event) => {
     setSearchTermRecommended(event.target.value.toLowerCase());
   };
@@ -518,11 +513,10 @@ function DashboardPage() {
   const filteredAvailableClasses = availableClasses.filter((classData) =>
     classData.subject.name.toLowerCase().includes(searchTermOffered)
   );
-  
+
   const filteredRecommendedClasses = recommendedSubjects.filter((classData) =>
     classData.subject.name.toLowerCase().includes(searchTermRecommended)
   );
-  
 
   const handleOpenSlotDialog = (day, timeSlot) => {
     const availableClassesForSlot = availableClasses.filter(classData => {
@@ -583,7 +577,34 @@ function DashboardPage() {
   };
 
   return (
-    <Box sx={{ padding: 4 }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        backgroundColor: getBackgroundColor(),
+        color: getTextColor(),
+        padding: 4,
+      }}
+    >
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} sm={8}>
+          <Typography variant="h4" gutterBottom>
+            Bem-vindo, {profile ? profile.name.split(' ')[0].charAt(0).toUpperCase() + profile.name.split(' ')[0].slice(1).toLowerCase() : 'Carregando...'}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={4} textAlign="right">
+          <Tooltip title={theme === 'light' ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'}>
+            <IconButton onClick={toggleTheme} color="primary">
+              {theme === 'light' ? <DarkMode /> : <LightMode />}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Logout">
+            <IconButton color="primary" onClick={handleLogout}>
+              <Logout />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </Grid>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
@@ -595,22 +616,7 @@ function DashboardPage() {
         </Alert>
       </Snackbar>
 
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} sm={8}>
-          <Typography variant="h4" gutterBottom>
-            Bem-vindo, {profile ? profile.name.split(' ')[0].charAt(0).toUpperCase() + profile.name.split(' ')[0].slice(1).toLowerCase() : 'Carregando...'}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={4} textAlign="right">
-          <Tooltip title="Logout">
-            <IconButton color="primary" onClick={handleLogout}>
-              <Logout />
-            </IconButton>
-          </Tooltip>
-        </Grid>
-      </Grid>
-
-      <Paper sx={{ padding: 2, marginTop: 2 }}>
+      <Paper sx={{ padding: 2, marginTop: 2, backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle1">Matrícula: {profile ? profile.id : 'Carregando...'}</Typography>
@@ -645,6 +651,7 @@ function DashboardPage() {
             onToggleClass={handleToggleClassInSchedule}
             onOpenDialog={handleOpenDialog}
             loading={loading}
+            theme={theme}
           />
         </Grid>
 
@@ -660,12 +667,13 @@ function DashboardPage() {
             onToggleClass={handleToggleClassInSchedule}
             onOpenDialog={handleOpenDialog}
             loading={loading}
+            theme={theme}
           />
         </Grid>
       </Grid>
 
       <Box sx={{ marginTop: 4 }}>
-        <Paper sx={{ padding: 2 }}>
+        <Paper sx={{ padding: 2, backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
           <Typography variant="h5" align="center" gutterBottom>
             Sua Agenda
           </Typography>
@@ -673,78 +681,79 @@ function DashboardPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ width: '120px' }}>Horário</TableCell>
-                  <TableCell sx={{ width: '200px', textAlign: 'center' }}>Segunda</TableCell>
-                  <TableCell sx={{ width: '200px', textAlign: 'center' }}>Terça</TableCell>
-                  <TableCell sx={{ width: '200px', textAlign: 'center' }}>Quarta</TableCell>
-                  <TableCell sx={{ width: '200px', textAlign: 'center' }}>Quinta</TableCell>
-                  <TableCell sx={{ width: '200px', textAlign: 'center' }}>Sexta</TableCell>
+                  <TableCell sx={{ width: '120px', backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Horário</TableCell>
+                  <TableCell sx={{ width: '200px', textAlign: 'center', backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Segunda</TableCell>
+                  <TableCell sx={{ width: '200px', textAlign: 'center', backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Terça</TableCell>
+                  <TableCell sx={{ width: '200px', textAlign: 'center', backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Quarta</TableCell>
+                  <TableCell sx={{ width: '200px', textAlign: 'center', backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Quinta</TableCell>
+                  <TableCell sx={{ width: '200px', textAlign: 'center', backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Sexta</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {['8:00-10:00', '10:00-12:00', '14:00-16:00', '16:00-18:00'].map(timeSlot => (
                   <TableRow key={timeSlot}>
-                    <TableCell sx={{ width: '120px' }}>{timeSlot}</TableCell>
+                    <TableCell sx={{ width: '120px', color: theme === 'light' ? '#000000' : '#ffffff' }}>{timeSlot}</TableCell>
                     {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].map(day => {
                       const key = `${day} ${timeSlot}`;
                       const classInfo = agendas[currentAgendaIndex][key];
                       return (
                         <Tooltip title={classInfo ? "Clique para remover a cadeira da agenda" : "Clique para adicionar uma cadeira"}>
-                        <TableCell
-                          key={day}
-                          sx={{
-                            width: '200px',
-                            maxWidth: '200px',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            backgroundColor: classInfo ? '#e0f7fa' : '#fff',
-                            cursor: classInfo ? 'pointer' : 'default',
-                            textAlign: 'center',
-                            padding: '8px',
-                            position: 'relative',
-                            '&:hover': {
-                              backgroundColor: classInfo ? '#ffcdd2' : '#f0f0f0',
-                              '& .remove-text': {
-                                opacity: 1,
+                          <TableCell
+                            key={day}
+                            sx={{
+                              width: '200px',
+                              maxWidth: '200px',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              backgroundColor: classInfo ? (theme === 'light' ? '#e0f7fa' : '#37474f') : (theme === 'light' ? '#fff' : '#303030'),
+                              cursor: classInfo ? 'pointer' : 'default',
+                              textAlign: 'center',
+                              padding: '8px',
+                              position: 'relative',
+                              color: theme === 'light' ? '#000000' : '#ffffff',
+                              '&:hover': {
+                                backgroundColor: classInfo ? (theme === 'light' ? '#ffcdd2' : '#455a64') : (theme === 'light' ? '#f0f0f0' : '#424242'),
+                                '& .remove-text': {
+                                  opacity: 1,
+                                }
                               }
-                            }
-                          }}
-                          onClick={() => {
-                            if (classInfo) {
-                              handleRemoveClassFromSchedule(classInfo.subjectName);
-                            } else {
-                              handleOpenSlotDialog(day, timeSlot);
-                            }
-                          }}
-                        >
-                          {classInfo ? (
-                            <>
-                              <Typography variant="subtitle2" noWrap>{classInfo.subjectName}</Typography>
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  position: 'absolute',
-                                  bottom: 2,
-                                  left: '50%',
-                                  transform: 'translateX(-50%)',
-                                  opacity: 0,
-                                  transition: 'opacity 0.3s ease-in-out',
-                                  color: 'red',
-                                }}
-                                className="remove-text"
-                              >
-                                Remover
-                              </Typography>
-                            </>
-                          ) : (
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#aaa' }}>
-                              <Add fontSize="small" />
-                              <Typography variant="caption">Adicionar Cadeira</Typography>
-                            </Box>
-                          )}
-                        </TableCell>
-                      </Tooltip>
+                            }}
+                            onClick={() => {
+                              if (classInfo) {
+                                handleRemoveClassFromSchedule(classInfo.subjectName);
+                              } else {
+                                handleOpenSlotDialog(day, timeSlot);
+                              }
+                            }}
+                          >
+                            {classInfo ? (
+                              <>
+                                <Typography variant="subtitle2" noWrap sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>{classInfo.subjectName}</Typography>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    position: 'absolute',
+                                    bottom: 2,
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    opacity: 0,
+                                    transition: 'opacity 0.3s ease-in-out',
+                                    color: 'red',
+                                  }}
+                                  className="remove-text"
+                                >
+                                  Remover
+                                </Typography>
+                              </>
+                            ) : (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#aaa' }}>
+                                <Add fontSize="small" />
+                                <Typography variant="caption">Adicionar Cadeira</Typography>
+                              </Box>
+                            )}
+                          </TableCell>
+                        </Tooltip>
                       );
                     })}
                   </TableRow>
@@ -767,6 +776,10 @@ function DashboardPage() {
             key={index}
             variant={index === currentAgendaIndex ? 'contained' : 'outlined'}
             onClick={() => handleSwitchAgenda(index)}
+            sx={{
+              backgroundColor: index === currentAgendaIndex ? (theme === 'light' ? '#e0e0e0' : '#616161') : 'inherit',
+              color: theme === 'light' ? '#000000' : '#ffffff'
+            }}
           >
             {index + 1}
           </Button>
@@ -777,43 +790,43 @@ function DashboardPage() {
       </Box>
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Detalhes da Turma</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>Detalhes da Turma</DialogTitle>
+        <DialogContent sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
           {selectedClass && (
             <>
               <Typography variant="subtitle1">Cadeira: {selectedClass.subject.name}</Typography>
               <Typography variant="subtitle1">Turma: T{selectedClass.classID}</Typography>
               <Typography variant="subtitle1">Horários:</Typography>
               {selectedClass.schedules.map((schedule, i) => (
-                <Chip key={i} label={`${schedule.day} ${schedule.start} - ${schedule.end}`} sx={{ margin: 0.5 }} />
+                <Chip key={i} label={`${schedule.day} ${schedule.start} - ${schedule.end}`} sx={{ margin: 0.5, backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }} />
               ))}
             </>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">Fechar</Button>
+        <DialogActions sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242' }}>
+          <Button onClick={handleCloseDialog} color="primary" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Fechar</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={slotDialog.open} onClose={handleCloseSlotDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Cadeiras Disponíveis para {slotDialog.slotDay}, {slotDialog.slotTime}</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>Cadeiras Disponíveis para {slotDialog.slotDay}, {slotDialog.slotTime}</DialogTitle>
+        <DialogContent sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
           <List>
             {slotDialog.availableClasses.length > 0 ? (
               slotDialog.availableClasses.map((classData, index) => (
                 <ListItem key={index} disablePadding>
                   <ListItemButton onClick={() => handleAddClassToScheduleFromDialog(classData)}>
-                    <ListItemText primary={`${classData.subject.name} - T${classData.classID}`} />
+                    <ListItemText primary={`${classData.subject.name} - T${classData.classID}`} sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }} />
                   </ListItemButton>
                 </ListItem>
               ))
             ) : (
-              <Typography variant="body2">Nenhuma cadeira disponível neste horário.</Typography>
+              <Typography variant="body2" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Nenhuma cadeira disponível neste horário.</Typography>
             )}
           </List>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseSlotDialog} color="primary">Fechar</Button>
+        <DialogActions sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242' }}>
+          <Button onClick={handleCloseSlotDialog} color="primary" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Fechar</Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -86,6 +86,7 @@ const styles = {
       minHeight: '100vh',
       display: 'flex',
       justifyContent: 'center',
+      backgroundColor: '#d6eaf8',
       alignItems: 'center',
       padding: '0', 
       margin: '0',
