@@ -27,7 +27,7 @@ function LoginPage() {
     };
 
     try {
-      const response = await axiosASInstance.post('/as/tokens', { credentials });
+      const response = await axiosASInstance.post('/tokens', { credentials });
       const token = response.data.token;
       localStorage.setItem('token', token);
       navigate('/dashboard');

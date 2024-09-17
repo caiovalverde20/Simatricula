@@ -206,7 +206,7 @@ function DashboardPage() {
     const token = localStorage.getItem('token');
 
     try {
-      const classesResponse = await axiosDASInstance.get('/das/class/getClassCourse', {
+      const classesResponse = await axiosDASInstance.get('/class/getClassCourse', {
         headers: {
           'Authentication-Token': token,
         },
@@ -218,7 +218,7 @@ function DashboardPage() {
 
       let classesData = classesResponse.data;
 
-      const curriculumResponse = await axiosDASInstance.get('/das/course/getSubjectsPerCurriculum', {
+      const curriculumResponse = await axiosDASInstance.get('/course/getSubjectsPerCurriculum', {
         headers: {
           'Authentication-Token': token,
         },
@@ -235,7 +235,7 @@ function DashboardPage() {
       );
 
       const classesWithSchedules = await Promise.all(classesData.map(async classData => {
-        const scheduleResponse = await axiosDASInstance.get('/das/class/getClassSchedule', {
+        const scheduleResponse = await axiosDASInstance.get('/class/getClassSchedule', {
           headers: {
             'Authentication-Token': token,
           },
@@ -326,7 +326,7 @@ function DashboardPage() {
       }
 
       try {
-        const profileResponse = await axiosASInstance.get('/as/profile', {
+        const profileResponse = await axiosASInstance.get('/profile', {
           headers: {
             'Authentication-Token': token,
           },
@@ -335,7 +335,7 @@ function DashboardPage() {
         const profileData = profileResponse.data;
         setProfile(profileData);
 
-        const historyResponse = await axiosDASInstance.get('/das/student/getHistory', {
+        const historyResponse = await axiosDASInstance.get('/student/getHistory', {
           headers: {
             'Authentication-Token': token,
           },
@@ -359,7 +359,7 @@ function DashboardPage() {
         setCurriculumCode(historyData.curriculumCode);
         setCompletedTerms(historyResponse.data.metrics.completedTerms);
 
-        const curriculumResponse = await axiosDASInstance.get('/das/course/getCurriculum', {
+        const curriculumResponse = await axiosDASInstance.get('/course/getCurriculum', {
           headers: {
             'Authentication-Token': token,
           },
@@ -378,7 +378,7 @@ function DashboardPage() {
 
         setCreditsInfo(minCreditsInfo);
 
-        const subjectsResponse = await axiosDASInstance.get('/das/course/getSubjectsPerCurriculum', {
+        const subjectsResponse = await axiosDASInstance.get('/course/getSubjectsPerCurriculum', {
           headers: {
             'Authentication-Token': token,
           },
