@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const AS_BASE_URL = 'https://pre.ufcg.edu.br:8443/as_scao';
-const DAS_BASE_URL = 'https://pre.ufcg.edu.br:8443/das-scao';
+const AS_BASE_URL = 'https://eureca.sti.ufcg.edu.br/as';
+const DAS_BASE_URL = 'https://eureca.sti.ufcg.edu.br/das/v2';
 
 const axiosASInstance = axios.create({
   baseURL: AS_BASE_URL,

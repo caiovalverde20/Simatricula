@@ -293,7 +293,7 @@ function DashboardPage() {
   const fetchCurrentTerm = async (campus) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get('https://eureca.sti.ufcg.edu.br/das-dev/v1/termCalendar/getAllByCurrentTerm', {
+      const response = await axiosDASInstance.get('termCalendar/getAllByCurrentTerm', {
         headers: {
           'Authentication-Token': token,
         },
