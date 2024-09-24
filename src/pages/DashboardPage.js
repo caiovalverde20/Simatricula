@@ -46,7 +46,7 @@ const CadeiraTable = ({
     <Paper sx={{ padding: 2, display: 'flex', flexDirection: 'column', height: { xs: '300px', sm: '400px', md: '450px' }, backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
       <Box sx={{ marginBottom: 2 }}>
         <TextField
-          label="Pesquisar Cadeira"
+          label="Pesquisar Disciplina"
           variant="outlined"
           fullWidth
           value={searchTerm}
@@ -61,14 +61,14 @@ const CadeiraTable = ({
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <CircularProgress sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }} />
-          <Typography variant="body1" sx={{ marginLeft: 2, color: theme === 'light' ? '#000000' : '#ffffff' }}>Carregando cadeiras...</Typography>
+          <Typography variant="body1" sx={{ marginLeft: 2, color: theme === 'light' ? '#000000' : '#ffffff' }}>Carregando disciplinas...</Typography>
         </Box>
       ) : classesData.length > 0 ? (
         <TableContainer sx={{ flex: 1, overflowY: 'auto' }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Cadeira</TableCell>
+                <TableCell sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Disciplina</TableCell>
                 <TableCell sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Turma</TableCell>
                 <TableCell sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Horários</TableCell>
                 <TableCell align="center" sx={{ backgroundColor: theme === 'light' ? '#e0e0e0' : '#616161', color: theme === 'light' ? '#000000' : '#ffffff' }}>Ações</TableCell>
@@ -146,7 +146,7 @@ const CadeiraTable = ({
           </Table>
         </TableContainer>
       ) : (
-        <Typography variant="body1" align="center" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Nenhuma cadeira disponível.</Typography>
+        <Typography variant="body1" align="center" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Nenhuma disciplina disponível.</Typography>
       )}
     </Paper>
   );
@@ -281,7 +281,7 @@ function DashboardPage() {
 
       setRecommendedSubjects(recommended);
     } catch (error) {
-      console.error('Erro ao buscar cadeiras e recomendações:', error);
+      console.error('Erro ao buscar disciplinas e recomendações:', error);
       if (error.response && error.response.data.message === "Expired token.") {
         localStorage.clear();
         navigate('/login');
@@ -442,7 +442,7 @@ function DashboardPage() {
 
   const handleAddClassToSchedule = (classData) => {
     if (!classData.schedules) {
-      showSnackbar(`Horários não encontrados para a cadeira ${classData.subject.name}`, 'warning');
+      showSnackbar(`Horários não encontrados para a disciplina ${classData.subject.name}`, 'warning');
       return;
     }
 
@@ -641,7 +641,7 @@ function DashboardPage() {
       <Grid container spacing={4} sx={{ marginTop: 2 }}>
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
-            Cadeiras Ofertadas em {selectedTerm}
+          Disciplinas Ofertadas em {selectedTerm}
           </Typography>
           <CadeiraTable
             classesData={filteredAvailableClasses}
@@ -657,7 +657,7 @@ function DashboardPage() {
 
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>
-            Cadeiras Recomendadas
+          Disciplinas Recomendadas
           </Typography>
           <CadeiraTable
             classesData={filteredRecommendedClasses}
@@ -697,7 +697,7 @@ function DashboardPage() {
                       const key = `${day} ${timeSlot}`;
                       const classInfo = agendas[currentAgendaIndex][key];
                       return (
-                        <Tooltip title={classInfo ? "Clique para remover a cadeira da agenda" : "Clique para adicionar uma cadeira"}>
+                        <Tooltip title={classInfo ? "Clique para remover a disciplina da agenda" : "Clique para adicionar uma disciplina"}>
                           <TableCell
                             key={day}
                             sx={{
@@ -749,7 +749,7 @@ function DashboardPage() {
                             ) : (
                               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#aaa' }}>
                                 <Add fontSize="small" />
-                                <Typography variant="caption">Adicionar Cadeira</Typography>
+                                <Typography variant="caption">Adicionar Disciplina</Typography>
                               </Box>
                             )}
                           </TableCell>
@@ -794,7 +794,7 @@ function DashboardPage() {
         <DialogContent sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
           {selectedClass && (
             <>
-              <Typography variant="subtitle1">Cadeira: {selectedClass.subject.name}</Typography>
+              <Typography variant="subtitle1">Disciplina: {selectedClass.subject.name}</Typography>
               <Typography variant="subtitle1">Turma: T{selectedClass.classID}</Typography>
               <Typography variant="subtitle1">Horários:</Typography>
               {selectedClass.schedules.map((schedule, i) => (
@@ -809,7 +809,7 @@ function DashboardPage() {
       </Dialog>
 
       <Dialog open={slotDialog.open} onClose={handleCloseSlotDialog} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>Cadeiras Disponíveis para {slotDialog.slotDay}, {slotDialog.slotTime}</DialogTitle>
+        <DialogTitle sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>Disciplinas Disponíveis para {slotDialog.slotDay}, {slotDialog.slotTime}</DialogTitle>
         <DialogContent sx={{ backgroundColor: theme === 'light' ? '#ffffff' : '#424242', color: theme === 'light' ? '#000000' : '#ffffff' }}>
           <List>
             {slotDialog.availableClasses.length > 0 ? (
@@ -821,7 +821,7 @@ function DashboardPage() {
                 </ListItem>
               ))
             ) : (
-              <Typography variant="body2" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Nenhuma cadeira disponível neste horário.</Typography>
+              <Typography variant="body2" sx={{ color: theme === 'light' ? '#000000' : '#ffffff' }}>Nenhuma disciplina disponível neste horário.</Typography>
             )}
           </List>
         </DialogContent>
