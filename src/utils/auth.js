@@ -1,9 +1,9 @@
 import { axiosASInstance } from './axiosConfig';
 export const checkTokenValidity = async (token) => {
   try {
-    const response = await axiosASInstance.get('/as/profile', {
+    const response = await axiosASInstance.get('/profile', {
       headers: {
-        'Authentication-Token': token
+        'token-de-autenticacao': token
       }
     });
     return true;
