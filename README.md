@@ -1,70 +1,91 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Simatrícula: Sistema de Planejamento de Matrículas da UFCG
 
-## Available Scripts
+Simatrícula é uma aplicação web desenvolvida para ajudar os estudantes da Universidade Federal de Campina Grande (UFCG) no processo de matrícula. O sistema se conecta à API Eureka da UFCG para fornecer dados em tempo real sobre disciplinas, horários e turmas, tornando o processo mais rápido, eficiente e sem conflitos.
 
-In the project directory, you can run:
+## Demonstração
 
-### `npm start`
+Assista ao vídeo de demonstração do Simatrícula no link abaixo:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+[Assista à Demonstração](https://drive.google.com/file/d/1h15h72dnNq3c15kYy1pyCR_2Kgss8465/view?usp=sharing)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+> **Nota**: Você pode clicar no link acima para acessar o vídeo de demonstração hospedado no Google Drive.
 
-### `npm test`
+## Deploy
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Acesse o Simatrícula através do link abaixo:
 
-### `npm run build`
+[Simatrícula - Deploy](https://simatricula.vercel.app/)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Funcionalidades
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Autenticação com Controle Acadêmico**: Login com segurança usando credenciais do Controle Acadêmico da UFCG.
+- **Simulação de Matrícula**: Permite adicionar/remover disciplinas em uma grade interativa.
+- **Detecção Automática de Conflitos de Horários**: Notificação automática de conflitos de horário entre disciplinas selecionadas.
+- **Pesquisa por Disciplinas**: Busca rápida por nome ou código de disciplinas.
+- **Gerenciamento de Múltiplas Agendas**: Criação e comparação de diferentes combinações de horários.
+- **Modo Claro e Escuro**: Alternância entre temas claro e escuro conforme a preferência do usuário.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Instalação
 
-### `npm run eject`
+Siga os passos abaixo para instalar e rodar o projeto localmente:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 1. Clonar o repositório
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+git clone https://github.com/caiovalverde20/Simatricula.git
+cd Simatricula
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 2. Instalar dependências
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Execute o comando abaixo para instalar todas as dependências do projeto:
 
-## Learn More
+```bash
+npm install
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 3. Executar o projeto
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Para rodar o projeto em modo de desenvolvimento, utilize o comando:
 
-### Code Splitting
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Abra [http://localhost:3000](http://localhost:3000) para visualizar o projeto no navegador.
 
-### Analyzing the Bundle Size
+## Scripts Disponíveis
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+No diretório do projeto, você pode executar os seguintes comandos:
 
-### Making a Progressive Web App
+- `npm start`: Executa o aplicativo no modo de desenvolvimento.
+  - Abra [http://localhost:3000](http://localhost:3000) para visualizar no navegador.
+- `npm test`: Executa o test runner no modo interativo.
+- `npm run build`: Constrói o app para produção na pasta `build`. Os arquivos são minificados e otimizados para melhor performance.
+- `npm run eject`: **Nota**: Uma vez que você execute `eject`, não há como voltar atrás! Isso permite acesso a todas as configurações do projeto, mas é irreversível.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Contribuições
 
-### Advanced Configuration
+Contribuições são bem-vindas! Se quiser contribuir:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+1. Faça um fork do repositório.
+2. Crie uma nova branch para sua funcionalidade ou correção:
 
-### Deployment
+```bash
+git checkout -b minha-nova-feature
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+3. Faça o commit das suas mudanças:
 
-### `npm run build` fails to minify
+```bash
+git commit -m 'Adiciona nova feature'
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+4. Envie a branch:
+
+```bash
+git push origin minha-nova-feature
+```
+
+5. Abra um Pull Request.
