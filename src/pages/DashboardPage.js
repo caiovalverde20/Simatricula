@@ -400,9 +400,9 @@ function DashboardPage() {
     >
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} sm={8}>
-          <Typography variant="h4" gutterBottom>
-            Bem-vindo, {studentData ? studentData.nome : 'Carregando...'}
-          </Typography>
+        <Typography variant="h4" gutterBottom>
+          Bem-vindo, {studentData ? studentData.nome.split(' ')[0].charAt(0).toUpperCase() + studentData.nome.split(' ')[0].slice(1).toLowerCase() : 'Carregando...'}
+        </Typography>
         </Grid>
         <Grid item xs={12} sm={4} textAlign="right">
           <Tooltip title={theme === 'light' ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'}>
