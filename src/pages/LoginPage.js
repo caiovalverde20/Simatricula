@@ -29,7 +29,10 @@ function LoginPage() {
     try {
       const response = await axiosASInstance.post('/tokens', { credentials });
       const token = response.data.token;
+
       localStorage.setItem('token', token);
+      localStorage.setItem('studentId', username);
+
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {
@@ -79,62 +82,60 @@ function LoginPage() {
   );
 }
 
-
 const styles = {
-    background: {
-      backgroundColor: '#f0f4f8',
-      minHeight: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      backgroundColor: '#d6eaf8',
-      alignItems: 'center',
-      padding: '0', 
-      margin: '0',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      overflow: 'hidden',
-    },
-    container: {
-      width: '100%',
-      maxWidth: '400px',
-      padding: '2rem',
-      backgroundColor: '#ffffffdd',
-      borderRadius: '0.5rem',
-      boxShadow: '0 0 1rem rgba(0,0,0,0.1)',
-      textAlign: 'center',
-    },
-    form: {
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    input: {
-      marginBottom: '1rem',
-      padding: '0.75rem',
-      fontSize: '1rem',
-      borderRadius: '0.25rem',
-      border: '1px solid #ddd',
-      boxShadow: '0 0 0.5rem rgba(0,0,0,0.05)',
-    },
-    button: {
-      padding: '0.75rem',
-      fontSize: '1rem',
-      borderRadius: '0.25rem',
-      border: 'none',
-      backgroundColor: '#007bff',
-      color: '#fff',
-      cursor: 'pointer',
-      boxShadow: '0 0 0.5rem rgba(0,0,0,0.1)',
-    },
-    error: {
-      color: 'red',
-      marginTop: '1rem',
-    },
-    info: {
-      fontSize: '0.875rem',
-      color: '#555',
-      marginBottom: '1.25rem',
-    },
-  };
-  
+  background: {
+    backgroundColor: '#f0f4f8',
+    minHeight: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    backgroundColor: '#d6eaf8',
+    alignItems: 'center',
+    padding: '0', 
+    margin: '0',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    overflow: 'hidden',
+  },
+  container: {
+    width: '100%',
+    maxWidth: '400px',
+    padding: '2rem',
+    backgroundColor: '#ffffffdd',
+    borderRadius: '0.5rem',
+    boxShadow: '0 0 1rem rgba(0,0,0,0.1)',
+    textAlign: 'center',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  input: {
+    marginBottom: '1rem',
+    padding: '0.75rem',
+    fontSize: '1rem',
+    borderRadius: '0.25rem',
+    border: '1px solid #ddd',
+    boxShadow: '0 0 0.5rem rgba(0,0,0,0.05)',
+  },
+  button: {
+    padding: '0.75rem',
+    fontSize: '1rem',
+    borderRadius: '0.25rem',
+    border: 'none',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    cursor: 'pointer',
+    boxShadow: '0 0 0.5rem rgba(0,0,0,0.1)',
+  },
+  error: {
+    color: 'red',
+    marginTop: '1rem',
+  },
+  info: {
+    fontSize: '0.875rem',
+    color: '#555',
+    marginBottom: '1.25rem',
+  },
+};
 
 export default LoginPage;
