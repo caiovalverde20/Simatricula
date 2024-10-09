@@ -110,7 +110,7 @@ const ScheduleTable = ({
                             position: 'relative',
                             color: theme === 'light' ? '#000000' : '#ffffff',
                             '&:hover': {
-                              backgroundColor: classInfo ? (theme === 'light' ? '#ffcdd2' : '#455a64') : (theme === 'light' ? '#f0f0f0' : '#424242'),
+                              backgroundColor: classInfo ? (theme === 'light' ? '#ffcdd2' : '#ff7961') : (theme === 'light' ? '#f0f0f0' : '#424242'),
                             },
                           }}
                           onClick={() => {
