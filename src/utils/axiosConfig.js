@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const AS_BASE_URL = 'https://eureca.sti.ufcg.edu.br/as';
 const DAS_BASE_URL = 'https://eureca.sti.ufcg.edu.br/das/v2';
+const DAS_BASE_URL_V1 = 'https://eureca.lsd.ufcg.edu.br/das-sig/v1';
 
 const axiosASInstance = axios.create({
   baseURL: AS_BASE_URL,
@@ -9,6 +10,10 @@ const axiosASInstance = axios.create({
 
 const axiosDASInstance = axios.create({
   baseURL: DAS_BASE_URL,
+});
+
+const axiosDASInstanceV1 = axios.create({
+  baseURL: DAS_BASE_URL_V1,
 });
 
 axiosASInstance.interceptors.response.use(
@@ -22,4 +27,4 @@ axiosASInstance.interceptors.response.use(
   }
 );
 
-export { axiosASInstance, axiosDASInstance };
+export { axiosASInstance, axiosDASInstance, axiosDASInstanceV1 };

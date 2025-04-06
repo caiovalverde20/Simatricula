@@ -4,7 +4,7 @@ import { DarkMode, LightMode, Logout } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import StudentInfo from '../components/StudentInfo';
 import DisciplinaTable from '../components/DisciplinaTable';
-import { axiosDASInstance } from '../utils/axiosConfig';
+import { axiosDASInstance, axiosDASInstanceV1} from '../utils/axiosConfig';
 import ScheduleTable from '../components/ScheduleTable';
 
 function DashboardPage() {
@@ -253,12 +253,14 @@ function DashboardPage() {
       const curriculumSubjects = curriculumResponse.data;
       const studentId = localStorage.getItem('studentId');
 
-      const horariosResponse = await axiosDASInstance.get('/horarios', {
+      const cursoFormatado = curso === 14102100 ? 108095 : curso;
+
+      const horariosResponse = await axiosDASInstanceV1.get('/horarios', {
         params: {
           'periodo-de': selectedTerm,
           'periodo-ate': selectedTerm,
           campus: Number(studentId[0]),
-          curso,
+          curso: cursoFormatado,
         },
         headers: { 'token-de-autenticacao': token },
       });
