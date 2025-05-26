@@ -58,7 +58,6 @@ function DashboardPage() {
         params: { campus },
         headers: { 'token-de-autenticacao': token },
       });
-      console.log(response.data);
 
       if (response.data && response.data.length > 0) {
         const currentPeriodData = response.data
