@@ -54,13 +54,21 @@ function DashboardPage() {
     }
 
     try {
-      const response = await axiosDASInstance.get('/calendarios/periodo-corrente', {
+      const response = await axiosDASInstanceV1.get('/calendarios/periodo-corrente', {
         params: { campus },
         headers: { 'token-de-autenticacao': token },
       });
+      console.log(response.data);
 
       if (response.data && response.data.length > 0) {
-        const currentPeriodData = response.data.find((period) => period.campus === campus);
+        const currentPeriodData = response.data
+        .filter((period) => period.campus === campus)
+        .sort((a, b) => {
+          const [ay, as] = a.periodo.split('.').map(Number);
+          const [by, bs] = b.periodo.split('.').map(Number);
+          return by - ay || bs - as; 
+        })[0]; 
+
         if (currentPeriodData && currentPeriodData.periodo) {
           setSelectedTerm(currentPeriodData.periodo);
         } else {
