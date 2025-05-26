@@ -280,7 +280,14 @@ function DashboardPage() {
         curriculumSubjects.some((subject) => subject.codigo_da_disciplina === classData.codigo_da_disciplina)
       );
 
-      const groupedClasses = groupClassesByTurma(validClasses);
+      const classesWithValidSchedule = filteredClasses.filter(
+        (classData) =>
+          classData.dia !== null &&
+          classData.hora_de_inicio !== null &&
+          classData.hora_de_termino !== null
+      );
+
+      const groupedClasses = groupClassesByTurma(classesWithValidSchedule);
       setAvailableClasses(groupedClasses);
 
       setLoading(false);
