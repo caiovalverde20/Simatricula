@@ -1,4 +1,3 @@
-
 # Simatrícula: Sistema de Planejamento de Matrículas da UFCG
 
 Simatrícula é uma aplicação web desenvolvida para ajudar os estudantes da Universidade Federal de Campina Grande (UFCG) no processo de matrícula. O sistema se conecta à API Eureka da UFCG para fornecer dados em tempo real sobre disciplinas, horários e turmas, tornando o processo mais rápido, eficiente e sem conflitos.

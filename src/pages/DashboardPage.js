@@ -1,11 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Snackbar, Alert, IconButton, Tooltip } from '@mui/material';
-import { DarkMode, LightMode, Logout } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import StudentInfo from '../components/StudentInfo';
-import DisciplinaTable from '../components/DisciplinaTable';
-import { axiosDASInstance, axiosDASInstanceV1} from '../utils/axiosConfig';
-import ScheduleTable from '../components/ScheduleTable';
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Grid,
+  Typography,
+  Snackbar,
+  Alert,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
+import { DarkMode, LightMode, Logout } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import StudentInfo from "../components/StudentInfo";
+import DisciplinaTable from "../components/DisciplinaTable";
+import { axiosDASInstance, axiosDASInstanceV1 } from "../utils/axiosConfig";
+import ScheduleTable from "../components/ScheduleTable";
 
 function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -20,82 +28,97 @@ function DashboardPage() {
   const [recommendedSubjects, setRecommendedSubjects] = useState([]);
   const [agendas, setAgendas] = useState([{}]);
   const [currentAgendaIndex, setCurrentAgendaIndex] = useState(0);
-  const [selectedTerm, setSelectedTerm] = useState('');
-  const [searchTermOffered, setSearchTermOffered] = useState('');
-  const [searchTermRecommended, setSearchTermRecommended] = useState('');
+  const [selectedTerm, setSelectedTerm] = useState("");
+  const [searchTermOffered, setSearchTermOffered] = useState("");
+  const [searchTermRecommended, setSearchTermRecommended] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('error');
-  const [theme, setTheme] = useState('light');
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("error");
+  const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
 
-  const showSnackbar = (message, severity = 'error') => {
+  const showSnackbar = (message, severity = "error") => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
-  const getBackgroundColor = () => (theme === 'light' ? '#d6eaf8' : '#121212');
-  const getTextColor = () => (theme === 'light' ? '#000000' : '#ffffff');
+  const getBackgroundColor = () => (theme === "light" ? "#d6eaf8" : "#121212");
+  const getTextColor = () => (theme === "light" ? "#000000" : "#ffffff");
 
   const fetchCurrentTerm = async (campus) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token || !campus) {
-      showSnackbar('Erro ao carregar o campus ou token não encontrado', 'error');
+      showSnackbar(
+        "Erro ao carregar o campus ou token não encontrado",
+        "error",
+      );
       return;
     }
 
     try {
-      const response = await axiosDASInstanceV1.get('/calendarios/periodo-corrente', {
-        params: { campus },
-        headers: { 'token-de-autenticacao': token },
-      });
+      const response = await axiosDASInstanceV1.get(
+        "/calendarios/periodo-corrente",
+        {
+          params: { campus },
+          headers: { "token-de-autenticacao": token },
+        },
+      );
 
       if (response.data && response.data.length > 0) {
         const currentPeriodData = response.data
-        .filter((period) => period.campus === campus)
-        .sort((a, b) => {
-          const [ay, as] = a.periodo.split('.').map(Number);
-          const [by, bs] = b.periodo.split('.').map(Number);
-          return by - ay || bs - as; 
-        })[0]; 
+          .filter((period) => period.campus === campus)
+          .sort((a, b) => {
+            const [ay, as] = a.periodo.split(".").map(Number);
+            const [by, bs] = b.periodo.split(".").map(Number);
+            return by - ay || bs - as;
+          })[0];
 
         if (currentPeriodData && currentPeriodData.periodo) {
           setSelectedTerm(currentPeriodData.periodo);
         } else {
-          showSnackbar('Período atual não encontrado para o campus', 'warning');
+          showSnackbar("Período atual não encontrado para o campus", "warning");
         }
       } else {
-        showSnackbar('Nenhuma informação de período retornada pela API', 'error');
+        showSnackbar(
+          "Nenhuma informação de período retornada pela API",
+          "error",
+        );
       }
     } catch (error) {
-      console.error('Erro ao buscar o período atual:', error);
-      showSnackbar('Erro ao carregar o período atual. Tente novamente mais tarde.', 'error');
+      console.error("Erro ao buscar o período atual:", error);
+      showSnackbar(
+        "Erro ao carregar o período atual. Tente novamente mais tarde.",
+        "error",
+      );
     }
   };
 
   const fetchStudentData = async () => {
-    const token = localStorage.getItem('token');
-    const studentId = localStorage.getItem('studentId');
+    const token = localStorage.getItem("token");
+    const studentId = localStorage.getItem("studentId");
 
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
     try {
-      const response = await axiosDASInstance.get('/estudantes/historico/estudante', {
-        params: { estudante: studentId },
-        headers: { 'token-de-autenticacao': token },
-      });
+      const response = await axiosDASInstance.get(
+        "/estudantes/historico/estudante",
+        {
+          params: { estudante: studentId },
+          headers: { "token-de-autenticacao": token },
+        },
+      );
 
       const student = response.data;
       setStudentData(student);
@@ -104,41 +127,64 @@ function DashboardPage() {
       await fetchCurrentTerm(campus);
 
       fetchCurriculumInfo(student.codigo_do_curso, student.codigo_do_curriculo);
-      fetchCurriculumSubjects(student.codigo_do_curso, student.codigo_do_curriculo, student.historico_de_matriculas, student.periodos_completados);
+      fetchCurriculumSubjects(
+        student.codigo_do_curso,
+        student.codigo_do_curriculo,
+        student.historico_de_matriculas,
+        student.periodos_completados,
+      );
     } catch (error) {
-      console.error('Erro ao buscar dados do estudante:', error);
-      showSnackbar('Erro ao carregar os dados do estudante. Tente novamente mais tarde.', 'error');
+      console.error("Erro ao buscar dados do estudante:", error);
+      showSnackbar(
+        "Erro ao carregar os dados do estudante. Tente novamente mais tarde.",
+        "error",
+      );
       setLoading(false);
     }
   };
 
   useEffect(() => {
     if (studentData && selectedTerm) {
-      fetchAvailableClasses(studentData.codigo_do_curso, studentData.codigo_do_curriculo, studentData.historico_de_matriculas);
-      fetchCurriculumSubjects(studentData.codigo_do_curso, studentData.codigo_do_curriculo, studentData.historico_de_matriculas, studentData.periodos_completados);
+      fetchAvailableClasses(
+        studentData.codigo_do_curso,
+        studentData.codigo_do_curriculo,
+        studentData.historico_de_matriculas,
+      );
+      fetchCurriculumSubjects(
+        studentData.codigo_do_curso,
+        studentData.codigo_do_curriculo,
+        studentData.historico_de_matriculas,
+        studentData.periodos_completados,
+      );
     }
   }, [studentData, selectedTerm]);
 
   const fetchCurriculumInfo = async (curso, curriculo) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) return;
 
     try {
-      const response = await axiosDASInstance.get('/curriculos/curriculo', {
+      const response = await axiosDASInstance.get("/curriculos/curriculo", {
         params: { curso, curriculo },
-        headers: { 'token-de-autenticacao': token },
+        headers: { "token-de-autenticacao": token },
       });
       setCurriculumInfo(response.data);
     } catch (error) {
-      console.error('Erro ao buscar os dados do currículo:', error);
-      showSnackbar('Erro ao carregar as informações do currículo. Tente novamente mais tarde.', 'error');
+      console.error("Erro ao buscar os dados do currículo:", error);
+      showSnackbar(
+        "Erro ao carregar as informações do currículo. Tente novamente mais tarde.",
+        "error",
+      );
     }
   };
 
   const handleRemoveClassFromSchedule = (subjectName) => {
     const updatedAgenda = { ...agendas[currentAgendaIndex] };
     Object.keys(updatedAgenda).forEach((slot) => {
-      if (updatedAgenda[slot] && updatedAgenda[slot].subjectName === subjectName) {
+      if (
+        updatedAgenda[slot] &&
+        updatedAgenda[slot].subjectName === subjectName
+      ) {
         delete updatedAgenda[slot];
       }
     });
@@ -167,21 +213,41 @@ function DashboardPage() {
     setCurrentAgendaIndex(updatedAgendas.length - 1);
   };
 
-  const fetchCurriculumSubjects = async (curso, curriculo, studentHistory, completedPeriods) => {
-    const token = localStorage.getItem('token');
+  const fetchCurriculumSubjects = async (
+    curso,
+    curriculo,
+    studentHistory,
+    completedPeriods,
+  ) => {
+    const token = localStorage.getItem("token");
     if (!token) return;
 
     try {
-      const response = await axiosDASInstance.get('/disciplinas-por-curriculo', {
-        params: { curso, curriculo },
-        headers: { 'token-de-autenticacao': token },
-      });
+      const response = await axiosDASInstance.get(
+        "/disciplinas-por-curriculo",
+        {
+          params: { curso, curriculo },
+          headers: { "token-de-autenticacao": token },
+        },
+      );
 
       const curriculumSubjects = response.data;
 
-      const mandatoryCredits = calculateCredits(studentHistory, curriculumSubjects, 'OBRIGATORIO');
-      const optionalCredits = calculateCredits(studentHistory, curriculumSubjects, 'OPCIONAL');
-      const complementaryCredits = calculateCredits(studentHistory, curriculumSubjects, 'COMPLEMENTAR');
+      const mandatoryCredits = calculateCredits(
+        studentHistory,
+        curriculumSubjects,
+        "OBRIGATORIO",
+      );
+      const optionalCredits = calculateCredits(
+        studentHistory,
+        curriculumSubjects,
+        "OPCIONAL",
+      );
+      const complementaryCredits = calculateCredits(
+        studentHistory,
+        curriculumSubjects,
+        "COMPLEMENTAR",
+      );
 
       setCompletedCredits({
         mandatory: mandatoryCredits,
@@ -189,18 +255,18 @@ function DashboardPage() {
         complementary: complementaryCredits,
       });
 
-      const studentId = localStorage.getItem('studentId');
+      const studentId = localStorage.getItem("studentId");
 
       const approvedSubjects = studentHistory
-        .filter(enrollment => enrollment.status === 'Aprovado')
-        .map(enrollment => enrollment.codigo_da_disciplina);
+        .filter((enrollment) => enrollment.status === "Aprovado")
+        .map((enrollment) => enrollment.codigo_da_disciplina);
 
       const recommended = curriculumSubjects
         .filter((subject) => {
           if (approvedSubjects.includes(subject.codigo_da_disciplina)) {
             return false;
           }
-          if (subject.tipo === 'OPCIONAL') {
+          if (subject.tipo === "OPCIONAL") {
             return false;
           }
           const maxSemester = completedPeriods + 1;
@@ -224,20 +290,25 @@ function DashboardPage() {
 
       setRecommendedSubjects(recommended);
     } catch (error) {
-      console.error('Erro ao buscar disciplinas do currículo:', error);
-      showSnackbar('Erro ao carregar as disciplinas do currículo. Tente novamente mais tarde.', 'error');
+      console.error("Erro ao buscar disciplinas do currículo:", error);
+      showSnackbar(
+        "Erro ao carregar as disciplinas do currículo. Tente novamente mais tarde.",
+        "error",
+      );
     }
   };
 
   const calculateCredits = (studentHistory, curriculumSubjects, type) => {
     let totalCredits = 0;
-    const approvedHistory = studentHistory.filter((enrollment) => enrollment.status === 'Aprovado');
+    const approvedHistory = studentHistory.filter(
+      (enrollment) => enrollment.status === "Aprovado",
+    );
 
     approvedHistory.forEach((enrollment) => {
       const matchingSubject = curriculumSubjects.find(
         (subject) =>
           subject.codigo_da_disciplina === enrollment.codigo_da_disciplina &&
-          subject.tipo === type
+          subject.tipo === type,
       );
       if (matchingSubject) {
         totalCredits += matchingSubject.quantidade_de_creditos;
@@ -248,59 +319,98 @@ function DashboardPage() {
   };
 
   const fetchAvailableClasses = async (curso, curriculo, studentHistory) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token || !selectedTerm) return;
 
     try {
-      const curriculumResponse = await axiosDASInstance.get('/disciplinas-por-curriculo', {
-        params: { curso, curriculo },
-        headers: { 'token-de-autenticacao': token },
-      });
+      const curriculumResponse = await axiosDASInstance.get(
+        "/disciplinas-por-curriculo",
+        {
+          params: { curso, curriculo },
+          headers: { "token-de-autenticacao": token },
+        },
+      );
 
       const curriculumSubjects = curriculumResponse.data;
-      const studentId = localStorage.getItem('studentId');
+      const studentId = localStorage.getItem("studentId");
 
       const cursoFormatado = curso === 14102100 ? 108095 : curso;
 
-      const horariosResponse = await axiosDASInstanceV1.get('/horarios', {
+      const horariosResponse = await axiosDASInstanceV1.get("/horarios", {
         params: {
-          'periodo-de': selectedTerm,
-          'periodo-ate': selectedTerm,
+          "periodo-de": selectedTerm,
+          "periodo-ate": selectedTerm,
           campus: Number(studentId[0]),
           curso: cursoFormatado,
         },
-        headers: { 'token-de-autenticacao': token },
+        headers: { "token-de-autenticacao": token },
       });
 
       const scheduleData = horariosResponse.data;
-      const approvedHistory = studentHistory.filter((enrollment) => enrollment.status === 'Aprovado');
-      const filteredClasses = filterAlreadyTakenClasses(scheduleData, approvedHistory);
-
-      const validClasses = filteredClasses.filter((classData) =>
-        curriculumSubjects.some((subject) => subject.codigo_da_disciplina === classData.codigo_da_disciplina)
+      const approvedHistory = studentHistory.filter(
+        (enrollment) => enrollment.status === "Aprovado",
+      );
+      const filteredClasses = filterAlreadyTakenClasses(
+        scheduleData,
+        approvedHistory,
       );
 
-      const classesWithValidSchedule = filteredClasses.filter(
+      const validClasses = filteredClasses.filter((classData) =>
+        curriculumSubjects.some(
+          (subject) =>
+            subject.codigo_da_disciplina === classData.codigo_da_disciplina,
+        ),
+      );
+
+      const classesWithValidSchedule = validClasses.filter(
         (classData) =>
           classData.dia !== null &&
           classData.hora_de_inicio !== null &&
-          classData.hora_de_termino !== null
+          classData.hora_de_termino !== null,
       );
 
       const groupedClasses = groupClassesByTurma(classesWithValidSchedule);
-      setAvailableClasses(groupedClasses);
+      const uniqueClasses = removeDuplicateSchedules(groupedClasses);
+      setAvailableClasses(uniqueClasses);
 
       setLoading(false);
     } catch (error) {
-      console.error('Erro ao buscar horários das disciplinas:', error);
-      showSnackbar('Erro ao carregar os horários das disciplinas. Tente novamente mais tarde.', 'error');
+      console.error("Erro ao buscar horários das disciplinas:", error);
+      showSnackbar(
+        "Erro ao carregar os horários das disciplinas. Tente novamente mais tarde.",
+        "error",
+      );
       setLoading(false);
     }
   };
 
   const filterAlreadyTakenClasses = (scheduleData, studentHistory) => {
-    const takenClasses = studentHistory.map((enrollment) => enrollment.codigo_da_disciplina);
-    return scheduleData.filter((classData) => !takenClasses.includes(classData.codigo_da_disciplina));
+    const takenClasses = studentHistory.map(
+      (enrollment) => enrollment.codigo_da_disciplina,
+    );
+    return scheduleData.filter(
+      (classData) => !takenClasses.includes(classData.codigo_da_disciplina),
+    );
+  };
+
+  const removeDuplicateSchedules = (classes) => {
+    const seen = new Map();
+
+    return classes.filter((cls) => {
+      const sortedSchedule = [...cls.schedules]
+        .sort((a, b) => a.day - b.day || (a.start > b.start ? 1 : -1))
+        .map((s) => `${s.day}-${s.start}-${s.end}`)
+        .join("|");
+
+      const key = `${cls.codigo_da_disciplina}-${sortedSchedule}`;
+
+      if (seen.has(key)) {
+        return false;
+      }
+
+      seen.set(key, true);
+      return true;
+    });
   };
 
   const groupClassesByTurma = (scheduleData) => {
@@ -336,20 +446,28 @@ function DashboardPage() {
   };
 
   useEffect(() => {
-    if (Array.isArray(availableClasses) && availableClasses.length > 0 && recommendedSubjects.length > 0) {
-      const updatedRecommended = recommendedSubjects.map((recommendedSubject) => {
-        const matchingOffered = availableClasses.find(
-          (offeredClass) => offeredClass.codigo_da_disciplina === recommendedSubject.codigo_da_disciplina
-        );
-        if (matchingOffered) {
-          return {
-            ...recommendedSubject,
-            turma: matchingOffered.turma,
-            schedules: matchingOffered.schedules,
-          };
-        }
-        return recommendedSubject;
-      });
+    if (
+      Array.isArray(availableClasses) &&
+      availableClasses.length > 0 &&
+      recommendedSubjects.length > 0
+    ) {
+      const updatedRecommended = recommendedSubjects.map(
+        (recommendedSubject) => {
+          const matchingOffered = availableClasses.find(
+            (offeredClass) =>
+              offeredClass.codigo_da_disciplina ===
+              recommendedSubject.codigo_da_disciplina,
+          );
+          if (matchingOffered) {
+            return {
+              ...recommendedSubject,
+              turma: matchingOffered.turma,
+              schedules: matchingOffered.schedules,
+            };
+          }
+          return recommendedSubject;
+        },
+      );
       setRecommendedSubjects(updatedRecommended);
     }
   }, [availableClasses, recommendedSubjects]);
@@ -368,12 +486,12 @@ function DashboardPage() {
 
   const handleAddClassToSchedule = (classData) => {
     const updatedAgenda = { ...agendas[currentAgendaIndex] };
-  
+
     classData.schedules.forEach((schedule) => {
       const day = schedule.day;
       const timeSlot = `${schedule.start}-${schedule.end}`;
       const slotKey = `${day} ${timeSlot}`;
-  
+
       if (!updatedAgenda[slotKey]) {
         updatedAgenda[slotKey] = {
           subjectName: classData.nome_da_disciplina,
@@ -383,19 +501,20 @@ function DashboardPage() {
           end: schedule.end,
         };
       } else {
-        showSnackbar('Já existe uma disciplina nesse horário!', 'warning');
+        showSnackbar("Já existe uma disciplina nesse horário!", "warning");
       }
     });
-  
+
     const updatedAgendas = [...agendas];
     updatedAgendas[currentAgendaIndex] = updatedAgenda;
     setAgendas(updatedAgendas);
-  };  
+  };
 
-  
   const onToggleClass = (classData) => {
     const isAlreadyInSchedule = Object.values(agendas[currentAgendaIndex]).some(
-      (item) => item.subjectName === classData.nome_da_disciplina && item.classID === classData.turma
+      (item) =>
+        item.subjectName === classData.nome_da_disciplina &&
+        item.classID === classData.turma,
     );
 
     if (isAlreadyInSchedule) {
@@ -408,7 +527,7 @@ function DashboardPage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        minHeight: "100vh",
         backgroundColor: getBackgroundColor(),
         color: getTextColor(),
         padding: 4,
@@ -416,14 +535,22 @@ function DashboardPage() {
     >
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} sm={8}>
-        <Typography variant="h4" gutterBottom>
-          Bem-vindo, {studentData ? studentData.nome.split(' ')[0].charAt(0).toUpperCase() + studentData.nome.split(' ')[0].slice(1).toLowerCase() : 'Carregando...'}
-        </Typography>
+          <Typography variant="h4" gutterBottom>
+            Bem-vindo,{" "}
+            {studentData
+              ? studentData.nome.split(" ")[0].charAt(0).toUpperCase() +
+                studentData.nome.split(" ")[0].slice(1).toLowerCase()
+              : "Carregando..."}
+          </Typography>
         </Grid>
         <Grid item xs={12} sm={4} textAlign="right">
-          <Tooltip title={theme === 'light' ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'}>
+          <Tooltip
+            title={
+              theme === "light" ? "Ativar Modo Escuro" : "Ativar Modo Claro"
+            }
+          >
             <IconButton onClick={toggleTheme} color="primary">
-              {theme === 'light' ? <DarkMode /> : <LightMode />}
+              {theme === "light" ? <DarkMode /> : <LightMode />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Logout">
@@ -431,7 +558,7 @@ function DashboardPage() {
               color="primary"
               onClick={() => {
                 localStorage.clear();
-                navigate('/login');
+                navigate("/login");
               }}
             >
               <Logout />
@@ -444,9 +571,13 @@ function DashboardPage() {
         open={snackbarOpen}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { checkTokenValidity } from '../utils/auth';
+import React, { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { checkTokenValidity } from "../utils/auth";
 
 const PrivateRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
 
     if (token) {
-      checkTokenValidity(token).then(isValid => {
+      checkTokenValidity(token).then((isValid) => {
         if (!isValid) {
           localStorage.clear();
         }
